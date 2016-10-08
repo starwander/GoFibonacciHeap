@@ -131,6 +131,43 @@ var _ = Describe("Tests of fibHeap", func() {
 			}
 		})
 
+		It("Given a fibHeap inserted multiple values, when call Delete api with a non-exists value, it should return error.", func() {
+			for i := 0; i < 1000; i++ {
+				demo := new(demoStruct)
+				demo.tag = i
+				demo.key = float64(i)
+				demo.value = fmt.Sprint(i)
+				heap.Insert(demo)
+			}
+			Expect(heap.Num()).Should(BeEquivalentTo(1000))
+
+			deleteDemo := new(demoStruct)
+			deleteDemo.tag = 10000
+			deleteDemo.key = float64(10000)
+			deleteDemo.value = fmt.Sprint(10000)
+			Expect(heap.Delete(deleteDemo)).Should(HaveOccurred())
+			Expect(heap.Num()).Should(BeEquivalentTo(1000))
+		})
+
+		It("Given a fibHeap inserted multiple values, when call Delete api, it should remove the value from the heap.", func() {
+			for i := 0; i < 1000; i++ {
+				demo := new(demoStruct)
+				demo.tag = i
+				demo.key = float64(i)
+				demo.value = fmt.Sprint(i)
+				heap.Insert(demo)
+			}
+			Expect(heap.Num()).Should(BeEquivalentTo(1000))
+
+			for i := 0; i < 1000; i++ {
+				deleteDemo := new(demoStruct)
+				deleteDemo.tag = i
+				deleteDemo.key = float64(i)
+				deleteDemo.value = fmt.Sprint(i)
+				Expect(heap.Delete(deleteDemo)).ShouldNot(HaveOccurred())
+			}
+			Expect(heap.Num()).Should(BeEquivalentTo(0))
+		})
 	})
 
 	Context("union tests", func() {
@@ -278,7 +315,7 @@ var _ = Describe("Tests of fibHeap", func() {
 			Expect(heap.GetTag(10000)).Should(BeNil())
 		})
 
-		It("Given one fibHeaps which has a value with TAG, when GetTag this TAG, it should return the value with TAG.", func() {
+		It("Given one fibHeaps which has a value with TAG, when GetTag this TAG, it should return the value with this TAG.", func() {
 			rand.Seed(time.Now().Unix())
 			for i := 0; i < 1000; i++ {
 				demo := new(demoStruct)
@@ -295,6 +332,34 @@ var _ = Describe("Tests of fibHeap", func() {
 
 			Expect(heap.GetTag(10000)).Should(BeEquivalentTo(tagValue))
 			Expect(heap.Num()).Should(BeEquivalentTo(1001))
+		})
+
+		It("Given one fibHeaps which has not a value with TAG, when ExtractTag this TAG, it should return nil.", func() {
+			for i := 0; i < 1000; i++ {
+				demo := new(demoStruct)
+				demo.tag = i
+				demo.key = float64(i)
+				demo.value = fmt.Sprint(demo.key)
+				heap.Insert(demo)
+			}
+			Expect(heap.Num()).Should(BeEquivalentTo(1000))
+
+			Expect(heap.ExtractTag(1000)).Should(BeNil())
+			Expect(heap.Num()).Should(BeEquivalentTo(1000))
+		})
+
+		It("Given one fibHeaps which has a value with TAG, when ExtractTag this TAG, it should extract the value with this TAG from the heap.", func() {
+			for i := 0; i < 1000; i++ {
+				demo := new(demoStruct)
+				demo.tag = i
+				demo.key = float64(i)
+				demo.value = fmt.Sprint(demo.key)
+				heap.Insert(demo)
+			}
+			Expect(heap.Num()).Should(BeEquivalentTo(1000))
+
+			Expect(heap.ExtractTag(999).(*demoStruct).value).Should(BeEquivalentTo(fmt.Sprint(999)))
+			Expect(heap.Num()).Should(BeEquivalentTo(999))
 		})
 	})
 })

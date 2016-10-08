@@ -139,33 +139,34 @@ func (heap *fibHeap) DecreaseKey(value Value) error {
 	return nil
 }
 
-func (heap *fibHeap) cut(element *list.Element) {
-	node := element.Value.(*Node)
-	parent := node.parent
-	parent.Value.(*Node).children.Remove(element)
-	heap.roots.PushBack(node.value)
-	node.parent = nil
-	node.marked = false
-}
-
-func (heap *fibHeap) cascadingCut(element *list.Element) {
-	node := element.Value.(*Node)
-	parent := node.parent
-	if parent != nil {
-		if !node.marked {
-			node.marked = true
-		} else {
-			heap.cut(element)
-			heap.cascadingCut(parent)
-		}
+func (heap *fibHeap) Delete(value Value) error {
+	if _, exists := heap.index[value.Tag()]; !exists {
+		return errors.New("Value is not found")
 	}
 
+	heap.ExtractTag(value.Tag())
+
+	return nil
 }
 
 func (heap *fibHeap) GetTag(tag interface{}) (value Value) {
 	if element, exists := heap.index[tag]; exists {
 		value = element.Value.(*Node).value
 	}
+
+	return
+}
+
+func (heap *fibHeap) ExtractTag(tag interface{}) (value Value) {
+	var element *list.Element
+	var exists bool
+	if element, exists = heap.index[tag]; !exists {
+		return
+	}
+
+	value = element.Value.(*Node).value
+	element.Value.(*Node).key = math.Inf(-1)
+	heap.ExtractMin()
 
 	return
 }
@@ -226,4 +227,27 @@ func (heap *fibHeap) resetMin() {
 			key = tree.Value.(*Node).key
 		}
 	}
+}
+
+func (heap *fibHeap) cut(element *list.Element) {
+	node := element.Value.(*Node)
+	parent := node.parent
+	parent.Value.(*Node).children.Remove(element)
+	heap.roots.PushBack(node.value)
+	node.parent = nil
+	node.marked = false
+}
+
+func (heap *fibHeap) cascadingCut(element *list.Element) {
+	node := element.Value.(*Node)
+	parent := node.parent
+	if parent != nil {
+		if !node.marked {
+			node.marked = true
+		} else {
+			heap.cut(element)
+			heap.cascadingCut(parent)
+		}
+	}
+
 }

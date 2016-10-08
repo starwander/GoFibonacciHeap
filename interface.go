@@ -11,9 +11,9 @@ type FibHeap interface {
 	ExtractMin() Value
 	Union(FibHeap) error
 	DecreaseKey(Value) error
+	Delete(Value) error
 	GetTag(interface{}) Value
-	//ExtractTag(interface{}) Value
-	//Delete(interface{}) error
+	ExtractTag(interface{}) Value
 }
 
 type Value interface {
