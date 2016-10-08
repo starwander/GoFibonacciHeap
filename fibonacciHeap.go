@@ -2,11 +2,13 @@ package fibHeap
 
 import (
 	"container/list"
+	"errors"
 	"math"
 )
 
 type fibHeap struct {
 	roots *list.List
+	index map[interface{}]*list.Element
 	min   *list.Element
 	num   uint
 }
@@ -14,6 +16,7 @@ type fibHeap struct {
 type Node struct {
 	children *list.List
 	parent   *list.Element
+	tag      interface{}
 	key      float64
 	value    Value
 	marked   bool
@@ -24,18 +27,30 @@ func (heap *fibHeap) Num() uint {
 	return heap.num
 }
 
-func (heap *fibHeap) Insert(value Value) {
+func (heap *fibHeap) Insert(value Value) error {
+	if value.Key() <= math.Inf(-1) {
+		return errors.New("Negative infinity is reserved for internal usage.")
+	}
+
+	if _, exists := heap.index[value.Tag()]; exists {
+		return errors.New("Duplicate tag is not allowed")
+	}
+
 	node := new(Node)
+	node.tag = value.Tag()
 	node.key = value.Key()
 	node.value = value
 	node.children = list.New()
 
 	element := heap.roots.PushBack(node)
+	heap.index[node.tag] = element
 	heap.num++
 
 	if heap.min == nil || heap.min.Value.(*Node).key > node.key {
 		heap.min = element
 	}
+
+	return nil
 }
 
 func (heap *fibHeap) Minimum() Value {
@@ -46,7 +61,7 @@ func (heap *fibHeap) Minimum() Value {
 	return heap.min.Value.(*Node).value
 }
 
-func (heap *fibHeap) ExtractMin() interface{} {
+func (heap *fibHeap) ExtractMin() Value {
 	if heap.num == 0 {
 		return nil
 	}
@@ -63,6 +78,7 @@ func (heap *fibHeap) ExtractMin() interface{} {
 	}
 
 	heap.roots.Remove(heap.min)
+	delete(heap.index, heap.min.Value.(*Node).tag)
 	heap.num--
 
 	if heap.num == 0 {
@@ -76,19 +92,35 @@ func (heap *fibHeap) ExtractMin() interface{} {
 	return min.(*Node).value
 }
 
-func (heap *fibHeap) Union(another FibHeap) FibHeap {
+func (heap *fibHeap) Union(another FibHeap) error {
 	anotherHeap, safe := another.(*fibHeap)
 	if !safe {
 		return nil
 	}
+	for tag, _ := range anotherHeap.index {
+		if _, exists := heap.index[tag]; exists {
+			return errors.New("Duplicate tag is found in the target heap")
+		}
+	}
 
 	heap.roots.PushBackList(anotherHeap.roots)
+	for tag, element := range anotherHeap.index {
+		heap.index[tag] = element
+	}
 	heap.num += anotherHeap.num
 	if heap.min == nil || (anotherHeap.min != nil && anotherHeap.min.Value.(*Node).key < heap.min.Value.(*Node).key) {
 		heap.min = anotherHeap.min
 	}
 
-	return heap
+	return nil
+}
+
+func (heap *fibHeap) GetTag(tag interface{}) (value Value) {
+	if element, exists := heap.index[tag]; exists {
+		value = element.Value.(*Node).value
+	}
+
+	return
 }
 
 func (heap *fibHeap) consolidate() {
