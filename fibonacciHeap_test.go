@@ -74,6 +74,63 @@ var _ = Describe("Tests of fibHeap", func() {
 			}
 			Expect(heap.Num()).Should(BeEquivalentTo(0))
 		})
+
+		It("Given a fibHeap inserted multiple values, when call DecreaseKey api with a non-exists value, it should return error.", func() {
+			for i := 0; i < 1000; i++ {
+				demo := new(demoStruct)
+				demo.tag = i
+				demo.key = float64(i)
+				demo.value = fmt.Sprint(demo.key)
+				heap.Insert(demo)
+			}
+
+			decreaseDemo := new(demoStruct)
+			decreaseDemo.tag = 1000
+			decreaseDemo.key = float64(999)
+			decreaseDemo.value = fmt.Sprint(decreaseDemo.key)
+
+			Expect(heap.DecreaseKey(decreaseDemo)).Should(HaveOccurred())
+			Expect(heap.Num()).Should(BeEquivalentTo(1000))
+		})
+
+		It("Given a fibHeap inserted multiple values, when call DecreaseKey api with a greater key, it should return error.", func() {
+			for i := 0; i < 1000; i++ {
+				demo := new(demoStruct)
+				demo.tag = i
+				demo.key = float64(i)
+				demo.value = fmt.Sprint(demo.key)
+				heap.Insert(demo)
+			}
+
+			decreaseDemo := new(demoStruct)
+			decreaseDemo.tag = 999
+			decreaseDemo.key = float64(1000)
+			decreaseDemo.value = fmt.Sprint(decreaseDemo.key)
+
+			Expect(heap.DecreaseKey(decreaseDemo)).Should(HaveOccurred())
+			Expect(heap.Num()).Should(BeEquivalentTo(1000))
+		})
+
+		It("Given a fibHeap inserted multiple values, when call DecreaseKey api with a smaller key, it should decrease the key of the value in the heap.", func() {
+			for i := 0; i < 1000; i++ {
+				demo := new(demoStruct)
+				demo.tag = i
+				demo.key = float64(i + 1000)
+				demo.value = fmt.Sprint(i)
+				heap.Insert(demo)
+				demo.key = float64(i)
+				Expect(heap.DecreaseKey(demo)).ShouldNot(HaveOccurred())
+			}
+			Expect(heap.Num()).Should(BeEquivalentTo(1000))
+
+			for i := 0; i < 1000; i++ {
+				value := heap.ExtractMin()
+				Expect(value.(*demoStruct).tag).Should(BeEquivalentTo(i))
+				Expect(value.(*demoStruct).key).Should(BeEquivalentTo(i))
+				Expect(value.(*demoStruct).value).Should(BeEquivalentTo(fmt.Sprint(i)))
+			}
+		})
+
 	})
 
 	Context("union tests", func() {

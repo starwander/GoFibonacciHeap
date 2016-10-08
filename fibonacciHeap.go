@@ -115,6 +115,53 @@ func (heap *fibHeap) Union(another FibHeap) error {
 	return nil
 }
 
+func (heap *fibHeap) DecreaseKey(value Value) error {
+	var element *list.Element
+	var exists bool
+	if element, exists = heap.index[value.Tag()]; !exists {
+		return errors.New("Value is not found")
+	}
+	if value.Key() > element.Value.(*Node).key {
+		return errors.New("New key is greater than current key")
+	}
+
+	node := element.Value.(*Node)
+	node.key = value.Key()
+	if node.parent != nil {
+		parent := node.parent.Value.(*Node)
+		if node.key < parent.key {
+			heap.cut(element)
+			heap.cascadingCut(node.parent)
+		}
+	}
+
+	heap.resetMin()
+	return nil
+}
+
+func (heap *fibHeap) cut(element *list.Element) {
+	node := element.Value.(*Node)
+	parent := node.parent
+	parent.Value.(*Node).children.Remove(element)
+	heap.roots.PushBack(node.value)
+	node.parent = nil
+	node.marked = false
+}
+
+func (heap *fibHeap) cascadingCut(element *list.Element) {
+	node := element.Value.(*Node)
+	parent := node.parent
+	if parent != nil {
+		if !node.marked {
+			node.marked = true
+		} else {
+			heap.cut(element)
+			heap.cascadingCut(parent)
+		}
+	}
+
+}
+
 func (heap *fibHeap) GetTag(tag interface{}) (value Value) {
 	if element, exists := heap.index[tag]; exists {
 		value = element.Value.(*Node).value
