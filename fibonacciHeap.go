@@ -5,20 +5,6 @@ import (
 	"math"
 )
 
-type FibHeap interface {
-	Num() uint
-	Insert(Value)
-	Minimum() Value
-	ExtractMin() interface{}
-	//Union()
-	//DecreaseKey()
-	//Delete()
-}
-
-type Value interface {
-	Key() float64
-}
-
 type fibHeap struct {
 	roots *list.List
 	min   *list.Element
@@ -34,11 +20,8 @@ type Node struct {
 	degree   uint
 }
 
-func NewFibHeap() FibHeap {
-	heap := new(fibHeap)
-	heap.roots = list.New()
-
-	return heap
+func (heap *fibHeap) Num() uint {
+	return heap.num
 }
 
 func (heap *fibHeap) Insert(value Value) {
@@ -93,8 +76,19 @@ func (heap *fibHeap) ExtractMin() interface{} {
 	return min.(*Node).value
 }
 
-func (heap *fibHeap) Num() uint {
-	return heap.num
+func (heap *fibHeap) Union(another FibHeap) FibHeap {
+	anotherHeap, safe := another.(*fibHeap)
+	if !safe {
+		return nil
+	}
+
+	heap.roots.PushBackList(anotherHeap.roots)
+	heap.num += anotherHeap.num
+	if heap.min == nil || (anotherHeap.min != nil && anotherHeap.min.Value.(*Node).key < heap.min.Value.(*Node).key) {
+		heap.min = anotherHeap.min
+	}
+
+	return heap
 }
 
 func (heap *fibHeap) consolidate() {
@@ -153,5 +147,4 @@ func (heap *fibHeap) resetMin() {
 			key = tree.Value.(*Node).key
 		}
 	}
-
 }
