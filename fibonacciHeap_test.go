@@ -118,12 +118,18 @@ var _ = Describe("Tests of fibHeap", func() {
 				demo.key = float64(i + 1000)
 				demo.value = fmt.Sprint(i)
 				heap.Insert(demo)
-				demo.key = float64(i)
-				Expect(heap.DecreaseKey(demo)).ShouldNot(HaveOccurred())
 			}
-			Expect(heap.Num()).Should(BeEquivalentTo(1000))
+			heap.ExtractMin()
+			for i := 999; i >= 1; i-- {
+				decreaseDemo := new(demoStruct)
+				decreaseDemo.tag = i
+				decreaseDemo.key = float64(i)
+				decreaseDemo.value = fmt.Sprint(i)
+				Expect(heap.DecreaseKey(decreaseDemo)).ShouldNot(HaveOccurred())
+			}
+			Expect(heap.Num()).Should(BeEquivalentTo(999))
 
-			for i := 0; i < 1000; i++ {
+			for i := 1; i < 1000; i++ {
 				value := heap.ExtractMin()
 				Expect(value.(*demoStruct).tag).Should(BeEquivalentTo(i))
 				Expect(value.(*demoStruct).key).Should(BeEquivalentTo(i))
@@ -360,6 +366,7 @@ var _ = Describe("Tests of fibHeap", func() {
 
 			Expect(heap.ExtractTag(999).(*demoStruct).value).Should(BeEquivalentTo(fmt.Sprint(999)))
 			Expect(heap.Num()).Should(BeEquivalentTo(999))
+			Expect(heap.Minimum().(*demoStruct).value).Should(BeEquivalentTo(fmt.Sprint(0)))
 		})
 	})
 })

@@ -14,6 +14,7 @@ type FibHeap interface {
 	Delete(Value) error
 	GetTag(interface{}) Value
 	ExtractTag(interface{}) Value
+	String() string
 }
 
 type Value interface {
