@@ -25,7 +25,7 @@ type Value interface {
 func NewFibHeap() FibHeap {
 	heap := new(fibHeap)
 	heap.roots = list.New()
-	heap.index = make(map[interface{}]*Node)
+	heap.index = make(map[interface{}]*node)
 	heap.num = 0
 	heap.min = nil
 

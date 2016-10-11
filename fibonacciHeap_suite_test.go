@@ -11,8 +11,6 @@ func TestProxy(t *testing.T) {
 	RunSpecs(t, "GoFibonacciHeap Suite")
 }
 
-var ()
-
 var _ = Describe("Test initialization", func() {
 	Context("Register suite setup and teardown function", func() {
 		BeforeSuite(func() {

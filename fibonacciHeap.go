@@ -10,14 +10,14 @@ import (
 
 type fibHeap struct {
 	roots *list.List
-	index map[interface{}]*Node
-	min   *Node
+	index map[interface{}]*node
+	min   *node
 	num   uint
 }
 
-type Node struct {
+type node struct {
 	self     *list.Element
-	parent   *Node
+	parent   *node
 	children *list.List
 	marked   bool
 	degree   uint
@@ -43,7 +43,7 @@ func (heap *fibHeap) Insert(value Value) error {
 		return errors.New("Duplicate tag is not allowed")
 	}
 
-	node := new(Node)
+	node := new(node)
 	node.children = list.New()
 	node.tag = value.Tag()
 	node.key = value.Key()
@@ -78,8 +78,8 @@ func (heap *fibHeap) ExtractMin() Value {
 	children := heap.min.children
 	if children != nil {
 		for e := children.Front(); e != nil; e = e.Next() {
-			e.Value.(*Node).parent = nil
-			e.Value.(*Node).self = heap.roots.PushBack(e.Value.(*Node))
+			e.Value.(*node).parent = nil
+			e.Value.(*node).self = heap.roots.PushBack(e.Value.(*node))
 		}
 	}
 
@@ -102,7 +102,7 @@ func (heap *fibHeap) Union(another FibHeap) error {
 		return errors.New("Target heap is not a valid Fibonacci Heap")
 	}
 
-	for tag, _ := range anotherHeap.index {
+	for tag := range anotherHeap.index {
 		if _, exists := heap.index[tag]; exists {
 			return errors.New("Duplicate tag is found in the target heap")
 		}
@@ -179,9 +179,9 @@ func (heap *fibHeap) String() string {
 func probeTree(buffer *bytes.Buffer, tree *list.List) {
 	buffer.WriteString(fmt.Sprintf("< "))
 	for e := tree.Front(); e != nil; e = e.Next() {
-		buffer.WriteString(fmt.Sprintf("%f ", e.Value.(*Node).key))
-		if e.Value.(*Node).children.Len() != 0 {
-			probeTree(buffer, e.Value.(*Node).children)
+		buffer.WriteString(fmt.Sprintf("%f ", e.Value.(*node).key))
+		if e.Value.(*node).children.Len() != 0 {
+			probeTree(buffer, e.Value.(*node).children)
 		}
 	}
 	buffer.WriteString(fmt.Sprintf("> "))
@@ -191,7 +191,7 @@ func (heap *fibHeap) consolidate() {
 	treeDegrees := make(map[uint]*list.Element, heap.maxPossibleNum())
 
 	for tree := heap.roots.Front(); tree != nil; {
-		degree := tree.Value.(*Node).degree
+		degree := tree.Value.(*node).degree
 
 		if treeDegrees[degree] == nil {
 			treeDegrees[degree] = tree
@@ -207,12 +207,12 @@ func (heap *fibHeap) consolidate() {
 		for treeDegrees[degree] != nil {
 			anotherTree := treeDegrees[degree]
 			treeDegrees[degree] = nil
-			if tree.Value.(*Node).key <= anotherTree.Value.(*Node).key {
+			if tree.Value.(*node).key <= anotherTree.Value.(*node).key {
 				heap.roots.Remove(anotherTree)
-				heap.link(tree.Value.(*Node), anotherTree.Value.(*Node))
+				heap.link(tree.Value.(*node), anotherTree.Value.(*node))
 			} else {
 				heap.roots.Remove(tree)
-				heap.link(anotherTree.Value.(*Node), tree.Value.(*Node))
+				heap.link(anotherTree.Value.(*node), tree.Value.(*node))
 				tree = anotherTree
 			}
 			degree++
@@ -227,12 +227,12 @@ func (heap *fibHeap) maxPossibleNum() int {
 	maxPossibleRootNum := (int)(math.Ceil(-1 + math.Sqrt(float64(1+8*heap.num))/2))
 	if heap.roots.Len() < maxPossibleRootNum {
 		return heap.roots.Len()
-	} else {
-		return maxPossibleRootNum
 	}
+
+	return maxPossibleRootNum
 }
 
-func (heap *fibHeap) link(parent, child *Node) {
+func (heap *fibHeap) link(parent, child *node) {
 	child.marked = false
 	child.parent = parent
 	child.self = parent.children.PushBack(child)
@@ -242,14 +242,14 @@ func (heap *fibHeap) link(parent, child *Node) {
 func (heap *fibHeap) resetMin() {
 	key := math.Inf(1)
 	for tree := heap.roots.Front(); tree != nil; tree = tree.Next() {
-		if tree.Value.(*Node).key < key {
-			heap.min = tree.Value.(*Node)
-			key = tree.Value.(*Node).key
+		if tree.Value.(*node).key < key {
+			heap.min = tree.Value.(*node)
+			key = tree.Value.(*node).key
 		}
 	}
 }
 
-func (heap *fibHeap) decreaseKey(node *Node, value Value, key float64) error {
+func (heap *fibHeap) decreaseKey(node *node, value Value, key float64) error {
 	if key > node.key {
 		return errors.New("New key is greater than current key")
 	}
@@ -271,7 +271,7 @@ func (heap *fibHeap) decreaseKey(node *Node, value Value, key float64) error {
 	return nil
 }
 
-func (heap *fibHeap) cut(node *Node) {
+func (heap *fibHeap) cut(node *node) {
 	node.parent.children.Remove(node.self)
 	node.parent.degree--
 	node.parent = nil
@@ -279,7 +279,7 @@ func (heap *fibHeap) cut(node *Node) {
 	node.self = heap.roots.PushBack(node)
 }
 
-func (heap *fibHeap) cascadingCut(node *Node) {
+func (heap *fibHeap) cascadingCut(node *node) {
 	if node.parent != nil {
 		if !node.marked {
 			node.marked = true
