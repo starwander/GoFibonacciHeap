@@ -86,6 +86,10 @@ var _ = Describe("Tests of fibHeap", func() {
 			Expect(heap.Num()).Should(BeEquivalentTo(0))
 		})
 
+		It("Given a fibHeap, when call DecreaseKey api with a nil value, it should return error.", func() {
+			Expect(heap.DecreaseKey(nil)).Should(HaveOccurred())
+		})
+
 		It("Given a fibHeap inserted multiple values, when call DecreaseKey api with a non-exists value, it should return error.", func() {
 			for i := 0; i < 1000; i++ {
 				demo := new(demoStruct)
@@ -157,6 +161,10 @@ var _ = Describe("Tests of fibHeap", func() {
 				Expect(value.(*demoStruct).key).Should(BeEquivalentTo(i))
 				Expect(value.(*demoStruct).value).Should(BeEquivalentTo(fmt.Sprint(i)))
 			}
+		})
+
+		It("Given a fibHeap, when call Delete api with a nil value, it should return error.", func() {
+			Expect(heap.Delete(nil)).Should(HaveOccurred())
 		})
 
 		It("Given a fibHeap inserted multiple values, when call Delete api with a non-exists value, it should return error.", func() {
