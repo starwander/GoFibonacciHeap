@@ -1,3 +1,5 @@
+// Package fibHeap implements the Fibonacci Heap priority queue.
+// This implementation is a bit different from the traditional Fibonacci Heap by having an index map to achieve better encapsulation.
 package fibHeap
 
 import (
@@ -8,7 +10,19 @@ import (
 	"math"
 )
 
-type fibHeap struct {
+// All values push into or pop from the FibHeap must implement this Value interface.
+type Value interface {
+	// Tag returns the unique tag of the value.
+	// The tag is used in the index map.
+	Tag() interface{}
+	// Key returns the key as known as the priority of the value.
+	// The valid range of the key is (-inf, +inf].
+	Key() float64
+}
+
+// FibHeap represents a Fibonacci Heap.
+// Please note that all methods of FibHeap are not concurrent safe.
+type FibHeap struct {
 	roots *list.List
 	index map[interface{}]*node
 	min   *node
@@ -26,11 +40,30 @@ type node struct {
 	value    Value
 }
 
-func (heap *fibHeap) Num() uint {
+// NewFibHeap creates an initialized Fibonacci Heap.
+func NewFibHeap() *FibHeap {
+	heap := new(FibHeap)
+	heap.roots = list.New()
+	heap.index = make(map[interface{}]*node)
+	heap.num = 0
+	heap.min = nil
+
+	return heap
+}
+
+// Num returns the total number of values in the heap.
+func (heap *FibHeap) Num() uint {
 	return heap.num
 }
 
-func (heap *fibHeap) Insert(value Value) error {
+// Insert pushes the input value into the heap.
+// The input value must implements the Value interface.
+// Try to insert a duplicate tag value will cause an error return.
+// The valid range of the value's key is (-inf, +inf].
+// Try to insert a -inf key value will cause an error return.
+// Insert will check the nil interface but not the interface with nil value.
+// Try to input of an interface with nil value will cause invalid address panic.
+func (heap *FibHeap) Insert(value Value) error {
 	if value == nil {
 		return errors.New("Input value is nil.")
 	}
@@ -60,7 +93,10 @@ func (heap *fibHeap) Insert(value Value) error {
 	return nil
 }
 
-func (heap *fibHeap) Minimum() Value {
+// Minimum returns the current minimum value in the heap by key.
+// Minimum will not extract the value so the value will still exists in the heap.
+// An empty heap will return nil.
+func (heap *FibHeap) Minimum() Value {
 	if heap.num == 0 {
 		return nil
 	}
@@ -68,7 +104,9 @@ func (heap *fibHeap) Minimum() Value {
 	return heap.min.value
 }
 
-func (heap *fibHeap) ExtractMin() Value {
+// ExtractMin returns the current minimum value by key in the heap and then extracts the value from the heap.
+// An empty heap will return nil and extracts nothing.
+func (heap *FibHeap) ExtractMin() Value {
 	if heap.num == 0 {
 		return nil
 	}
@@ -96,12 +134,9 @@ func (heap *fibHeap) ExtractMin() Value {
 	return min.value
 }
 
-func (heap *fibHeap) Union(another FibHeap) error {
-	anotherHeap, safe := another.(*fibHeap)
-	if !safe {
-		return errors.New("Target heap is not a valid Fibonacci Heap")
-	}
-
+// Union merges the input heap into.
+// All values of the input heap must not have duplicate tags. Otherwise an error will be returned.
+func (heap *FibHeap) Union(anotherHeap *FibHeap) error {
 	for tag := range anotherHeap.index {
 		if _, exists := heap.index[tag]; exists {
 			return errors.New("Duplicate tag is found in the target heap")
@@ -115,7 +150,12 @@ func (heap *fibHeap) Union(another FibHeap) error {
 	return nil
 }
 
-func (heap *fibHeap) DecreaseKey(value Value) error {
+// DecreaseKey will update the value in the heap by the input value.
+// If the input value has a larger key or -inf key, an error will be returned.
+// If the tag of the input value is not existed in the heap, an error will be returned.
+// DecreaseKey will check the nil interface but not the interface with nil value.
+// Try to input of an interface with nil value will cause invalid address panic.
+func (heap *FibHeap) DecreaseKey(value Value) error {
 	if value == nil {
 		return errors.New("Input value is nil.")
 	}
@@ -131,7 +171,11 @@ func (heap *fibHeap) DecreaseKey(value Value) error {
 	return errors.New("Value is not found")
 }
 
-func (heap *fibHeap) Delete(value Value) error {
+// Delete will delete the value in the heap by the input value.
+// If the tag of the input value is not existed in the heap, an error will be returned.
+// Delete will check the nil interface but not the interface with nil value.
+// Try to input of an interface with nil value will cause invalid address panic.
+func (heap *FibHeap) Delete(value Value) error {
 	if value == nil {
 		return errors.New("Input value is nil.")
 	}
@@ -145,7 +189,10 @@ func (heap *fibHeap) Delete(value Value) error {
 	return nil
 }
 
-func (heap *fibHeap) GetTag(tag interface{}) (value Value) {
+// GetTag searches and returns the value in the heap by the input tag.
+// If the input tag does not exist in the heap, nil will be returned.
+// GetTag will not extract the value so the value will still exist in the heap.
+func (heap *FibHeap) GetTag(tag interface{}) (value Value) {
 	if node, exists := heap.index[tag]; exists {
 		value = node.value
 	}
@@ -153,7 +200,10 @@ func (heap *fibHeap) GetTag(tag interface{}) (value Value) {
 	return
 }
 
-func (heap *fibHeap) ExtractTag(tag interface{}) (value Value) {
+// GetTag searches and extracts the value in the heap by the input tag.
+// If the input tag does not exist in the heap, nil will be returned.
+// ExtractTag will extract the value so the value will no longer exist in the heap.
+func (heap *FibHeap) ExtractTag(tag interface{}) (value Value) {
 	if node, exists := heap.index[tag]; exists {
 		heap.decreaseKey(node, node.value, math.Inf(-1))
 		heap.ExtractMin()
@@ -164,7 +214,10 @@ func (heap *fibHeap) ExtractTag(tag interface{}) (value Value) {
 	return
 }
 
-func (heap *fibHeap) String() string {
+// String provides some basic debug information of the heap.
+// It returns the total number, roots size, index size and current minimum value of the heap.
+// It also returns the topology of the trees by dfs search.
+func (heap *FibHeap) String() string {
 	var buffer bytes.Buffer
 
 	buffer.WriteString(fmt.Sprintf("Total number: %d, Root Size: %d, Index size: %d,\n", heap.num, heap.roots.Len(), len(heap.index)))
@@ -187,7 +240,7 @@ func probeTree(buffer *bytes.Buffer, tree *list.List) {
 	buffer.WriteString(fmt.Sprintf("> "))
 }
 
-func (heap *fibHeap) consolidate() {
+func (heap *FibHeap) consolidate() {
 	treeDegrees := make(map[uint]*list.Element, heap.maxPossibleNum())
 
 	for tree := heap.roots.Front(); tree != nil; {
@@ -223,7 +276,7 @@ func (heap *fibHeap) consolidate() {
 	heap.resetMin()
 }
 
-func (heap *fibHeap) maxPossibleNum() int {
+func (heap *FibHeap) maxPossibleNum() int {
 	maxPossibleRootNum := (int)(math.Ceil(-1 + math.Sqrt(float64(1+8*heap.num))/2))
 	if heap.roots.Len() < maxPossibleRootNum {
 		return heap.roots.Len()
@@ -232,14 +285,14 @@ func (heap *fibHeap) maxPossibleNum() int {
 	return maxPossibleRootNum
 }
 
-func (heap *fibHeap) link(parent, child *node) {
+func (heap *FibHeap) link(parent, child *node) {
 	child.marked = false
 	child.parent = parent
 	child.self = parent.children.PushBack(child)
 	parent.degree++
 }
 
-func (heap *fibHeap) resetMin() {
+func (heap *FibHeap) resetMin() {
 	key := math.Inf(1)
 	for tree := heap.roots.Front(); tree != nil; tree = tree.Next() {
 		if tree.Value.(*node).key < key {
@@ -249,7 +302,7 @@ func (heap *fibHeap) resetMin() {
 	}
 }
 
-func (heap *fibHeap) decreaseKey(node *node, value Value, key float64) error {
+func (heap *FibHeap) decreaseKey(node *node, value Value, key float64) error {
 	if key > node.key {
 		return errors.New("New key is greater than current key")
 	}
@@ -271,7 +324,7 @@ func (heap *fibHeap) decreaseKey(node *node, value Value, key float64) error {
 	return nil
 }
 
-func (heap *fibHeap) cut(node *node) {
+func (heap *FibHeap) cut(node *node) {
 	node.parent.children.Remove(node.self)
 	node.parent.degree--
 	node.parent = nil
@@ -279,7 +332,7 @@ func (heap *fibHeap) cut(node *node) {
 	node.self = heap.roots.PushBack(node)
 }
 
-func (heap *fibHeap) cascadingCut(node *node) {
+func (heap *FibHeap) cascadingCut(node *node) {
 	if node.parent != nil {
 		if !node.marked {
 			node.marked = true

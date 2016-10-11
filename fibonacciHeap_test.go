@@ -11,8 +11,8 @@ import (
 
 var _ = Describe("Tests of fibHeap", func() {
 	var (
-		heap        FibHeap
-		anotherHeap FibHeap
+		heap        *FibHeap
+		anotherHeap *FibHeap
 	)
 
 	Context("behaviour tests", func() {
@@ -215,10 +215,6 @@ var _ = Describe("Tests of fibHeap", func() {
 		AfterEach(func() {
 			heap = nil
 			anotherHeap = nil
-		})
-
-		It("Given one fibHeaps and one invalid fibHeap, when call Union api, it should return error.", func() {
-			Expect(heap.Union(new(anotherKind))).Should(HaveOccurred())
 		})
 
 		It("Given two empty fibHeaps, when call Union api, it should return an empty fibHeap.", func() {
@@ -507,47 +503,4 @@ func (demo *demoStruct) Tag() interface{} {
 
 func (demo *demoStruct) Key() float64 {
 	return demo.key
-}
-
-type anotherKind struct {
-}
-
-func (heap *anotherKind) Num() uint {
-	return 0
-}
-
-func (heap *anotherKind) Insert(Value) error {
-	return nil
-}
-
-func (heap *anotherKind) Minimum() Value {
-	return nil
-}
-
-func (heap *anotherKind) ExtractMin() Value {
-	return nil
-}
-
-func (heap *anotherKind) Union(FibHeap) error {
-	return nil
-}
-
-func (heap *anotherKind) DecreaseKey(Value) error {
-	return nil
-}
-
-func (heap *anotherKind) Delete(Value) error {
-	return nil
-}
-
-func (heap *anotherKind) GetTag(interface{}) Value {
-	return nil
-}
-
-func (heap *anotherKind) ExtractTag(interface{}) Value {
-	return nil
-}
-
-func (heap *anotherKind) String() string {
-	return ""
 }
