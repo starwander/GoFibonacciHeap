@@ -10,7 +10,7 @@ import (
 	"math"
 )
 
-// All values push into or pop from the FibHeap must implement this Value interface.
+// Value is the interface that all values push into or pop from the FibHeap must implement.
 type Value interface {
 	// Tag returns the unique tag of the value.
 	// The tag is used in the index map.
@@ -200,7 +200,7 @@ func (heap *FibHeap) GetTag(tag interface{}) (value Value) {
 	return
 }
 
-// GetTag searches and extracts the value in the heap by the input tag.
+// ExtractTag searches and extracts the value in the heap by the input tag.
 // If the input tag does not exist in the heap, nil will be returned.
 // ExtractTag will extract the value so the value will no longer exist in the heap.
 func (heap *FibHeap) ExtractTag(tag interface{}) (value Value) {
