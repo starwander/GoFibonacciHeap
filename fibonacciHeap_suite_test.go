@@ -1,3 +1,5 @@
+// Copyright(c) 2016 Ethan Zhuang <zhuangwj@gmail.com>.
+
 package fibHeap
 
 import (

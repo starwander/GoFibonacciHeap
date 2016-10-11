@@ -1,3 +1,5 @@
+// Copyright(c) 2016 Ethan Zhuang <zhuangwj@gmail.com>.
+
 // Package fibHeap implements the Fibonacci Heap priority queue.
 // This implementation is a bit different from the traditional Fibonacci Heap by having an index map to achieve better encapsulation.
 package fibHeap
