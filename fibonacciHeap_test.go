@@ -369,6 +369,67 @@ var _ = Describe("Tests of fibHeap", func() {
 			Expect(heap.Minimum().(*demoStruct).value).Should(BeEquivalentTo(fmt.Sprint(0)))
 		})
 	})
+
+	Context("benchmark", func() {
+		BeforeEach(func() {
+			heap = NewFibHeap()
+		})
+
+		AfterEach(func() {
+			heap = nil
+		})
+
+		FMeasure("Benchmark Go Fibonacci Heap", func(b Benchmarker) {
+			rand.Seed(time.Now().Unix())
+			b.Time("1000000 radom operations", func() {
+				var (
+					insert, minimun, extract, decrease, delete int64
+					temp                                       *demoStruct
+				)
+				for i := 0; i < 1000000; i++ {
+					if i%3 == 0 {
+						demo := new(demoStruct)
+						demo.tag = i
+						demo.key = rand.Float64()
+						demo.value = fmt.Sprint(demo.key)
+						if heap.Insert(demo) == nil {
+							insert++
+						}
+					}
+					if i%5 == 0 {
+						if heap.ExtractMin() != nil {
+							extract++
+						}
+					}
+					if i%7 == 0 {
+						min := heap.Minimum()
+						if min != nil {
+							temp = min.(*demoStruct)
+							minimun++
+						}
+					}
+					if i%11 == 0 {
+						if temp != nil {
+							temp.key = temp.key / 2
+							if heap.DecreaseKey(temp) == nil {
+								decrease++
+							}
+						}
+					}
+					if i%13 == 0 {
+						if temp != nil {
+							if heap.Delete(temp) == nil {
+								delete++
+							}
+						}
+					}
+				}
+				fmt.Println("Final heap size:", heap.Num())
+				fmt.Println("Total insert:", insert, "Total minimun:", minimun, "Total extract:", extract, "Total decrease:", decrease, "Total delete:", delete)
+				Expect(heap.Num()).Should(BeEquivalentTo(insert - extract - delete))
+			})
+		}, 10)
+	})
 })
 
 type demoStruct struct {

@@ -30,6 +30,10 @@ func (heap *fibHeap) Num() uint {
 }
 
 func (heap *fibHeap) Insert(value Value) error {
+	if value == nil {
+		return errors.New("Input value is nil.")
+	}
+
 	if value.Key() <= math.Inf(-1) {
 		return errors.New("Negative infinity key is reserved for internal usage.")
 	}
@@ -115,6 +119,10 @@ func (heap *fibHeap) Union(another FibHeap) error {
 }
 
 func (heap *fibHeap) DecreaseKey(value Value) error {
+	if value == nil {
+		return errors.New("Input value is nil.")
+	}
+
 	var element *list.Element
 	var exists bool
 	if element, exists = heap.index[value.Tag()]; !exists {
@@ -148,6 +156,10 @@ func (heap *fibHeap) decreaseKey(element *list.Element, value Value, key float64
 }
 
 func (heap *fibHeap) Delete(value Value) error {
+	if value == nil {
+		return errors.New("Input value is nil.")
+	}
+
 	if _, exists := heap.index[value.Tag()]; !exists {
 		return errors.New("Value is not found")
 	}
