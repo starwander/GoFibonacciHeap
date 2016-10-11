@@ -169,8 +169,9 @@ func (heap *fibHeap) String() string {
 
 	buffer.WriteString(fmt.Sprintf("Total number: %d, Root Size: %d, Index size: %d,\n", heap.num, heap.roots.Len(), len(heap.index)))
 	buffer.WriteString(fmt.Sprintf("Current minimun: key(%f), tag(%v), value(%v),\n", heap.min.key, heap.min.tag, heap.min.value))
-	buffer.WriteString(fmt.Sprintf("Heap detail: "))
+	buffer.WriteString(fmt.Sprintf("Heap detail:\n"))
 	probeTree(&buffer, heap.roots)
+	buffer.WriteString(fmt.Sprintf("\n"))
 
 	return buffer.String()
 }
@@ -187,10 +188,6 @@ func probeTree(buffer *bytes.Buffer, tree *list.List) {
 }
 
 func (heap *fibHeap) consolidate() {
-	if heap.num == 0 {
-		return
-	}
-
 	treeDegrees := make(map[uint]*list.Element, heap.maxPossibleNum())
 
 	for tree := heap.roots.Front(); tree != nil; {
@@ -244,7 +241,6 @@ func (heap *fibHeap) link(parent, child *Node) {
 
 func (heap *fibHeap) resetMin() {
 	key := math.Inf(1)
-	heap.min = nil
 	for tree := heap.roots.Front(); tree != nil; tree = tree.Next() {
 		if tree.Value.(*Node).key < key {
 			heap.min = tree.Value.(*Node)
