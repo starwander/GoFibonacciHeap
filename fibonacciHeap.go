@@ -35,7 +35,7 @@ func (heap *fibHeap) Insert(value Value) error {
 		return errors.New("Input value is nil.")
 	}
 
-	if value.Key() <= math.Inf(-1) {
+	if math.IsInf(value.Key(), -1) {
 		return errors.New("Negative infinity key is reserved for internal usage.")
 	}
 
@@ -118,6 +118,10 @@ func (heap *fibHeap) Union(another FibHeap) error {
 func (heap *fibHeap) DecreaseKey(value Value) error {
 	if value == nil {
 		return errors.New("Input value is nil.")
+	}
+
+	if math.IsInf(value.Key(), -1) {
+		return errors.New("Negative infinity key is reserved for internal usage.")
 	}
 
 	if node, exists := heap.index[value.Tag()]; exists {

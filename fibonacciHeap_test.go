@@ -26,7 +26,19 @@ var _ = Describe("Tests of fibHeap", func() {
 
 		It("Given an empty fibHeap, when call Minimum api, it should return nil.", func() {
 			Expect(heap.Minimum()).Should(BeNil())
-			Expect(heap.Num()).Should(BeEquivalentTo(0))
+		})
+
+		It("Given a empty fibHeap, when call Insert api with a nil value, it should return error.", func() {
+			Expect(heap.Insert(nil)).Should(HaveOccurred())
+		})
+
+		It("Given a empty fibHeap, when call Insert api with a negetive infinity key, it should return error.", func() {
+			demo := new(demoStruct)
+			demo.tag = 1000
+			demo.key = math.Inf(-1)
+			demo.value = fmt.Sprint(1000)
+
+			Expect(heap.Insert(demo)).Should(HaveOccurred())
 		})
 
 		It("Given a fibHeap inserted multiple values, when call Minimum api, it should return the minimum value inserted.", func() {
@@ -51,7 +63,6 @@ var _ = Describe("Tests of fibHeap", func() {
 
 		It("Given an empty fibHeap, when call ExtractMin api, it should return nil.", func() {
 			Expect(heap.ExtractMin()).Should(BeNil())
-			Expect(heap.Num()).Should(BeEquivalentTo(0))
 		})
 
 		It("Given a fibHeap inserted multiple values, when call ExtractMin api, it should extract the minimum value inserted.", func() {
@@ -91,6 +102,17 @@ var _ = Describe("Tests of fibHeap", func() {
 
 			Expect(heap.DecreaseKey(decreaseDemo)).Should(HaveOccurred())
 			Expect(heap.Num()).Should(BeEquivalentTo(1000))
+		})
+
+		It("Given a fibHeap with a value, when call DecreaseKey api with a negetive infinity key, it should return error.", func() {
+			demo := new(demoStruct)
+			demo.tag = 1000
+			demo.key = float64(1000)
+			demo.value = fmt.Sprint(1000)
+			heap.Insert(demo)
+
+			demo.key = math.Inf(-1)
+			Expect(heap.DecreaseKey(demo)).Should(HaveOccurred())
 		})
 
 		It("Given a fibHeap inserted multiple values, when call DecreaseKey api with a greater key, it should return error.", func() {
@@ -185,6 +207,10 @@ var _ = Describe("Tests of fibHeap", func() {
 		AfterEach(func() {
 			heap = nil
 			anotherHeap = nil
+		})
+
+		It("Given one fibHeaps and one invalid fibHeap, when call Union api, it should return error.", func() {
+			Expect(heap.Union(new(anotherKind))).Should(HaveOccurred())
 		})
 
 		It("Given two empty fibHeaps, when call Union api, it should return an empty fibHeap.", func() {
@@ -444,4 +470,47 @@ func (demo *demoStruct) Tag() interface{} {
 
 func (demo *demoStruct) Key() float64 {
 	return demo.key
+}
+
+type anotherKind struct {
+}
+
+func (heap *anotherKind) Num() uint {
+	return 0
+}
+
+func (heap *anotherKind) Insert(Value) error {
+	return nil
+}
+
+func (heap *anotherKind) Minimum() Value {
+	return nil
+}
+
+func (heap *anotherKind) ExtractMin() Value {
+	return nil
+}
+
+func (heap *anotherKind) Union(FibHeap) error {
+	return nil
+}
+
+func (heap *anotherKind) DecreaseKey(Value) error {
+	return nil
+}
+
+func (heap *anotherKind) Delete(Value) error {
+	return nil
+}
+
+func (heap *anotherKind) GetTag(interface{}) Value {
+	return nil
+}
+
+func (heap *anotherKind) ExtractTag(interface{}) Value {
+	return nil
+}
+
+func (heap *anotherKind) String() string {
+	return ""
 }
