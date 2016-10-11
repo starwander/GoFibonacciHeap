@@ -19,7 +19,6 @@ var _ = Describe("Test initialization", func() {
 		})
 
 		AfterSuite(func() {
-
 		})
 	})
 })

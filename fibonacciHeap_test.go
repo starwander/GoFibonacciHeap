@@ -379,7 +379,7 @@ var _ = Describe("Tests of fibHeap", func() {
 			heap = nil
 		})
 
-		FMeasure("Benchmark Go Fibonacci Heap", func(b Benchmarker) {
+		Measure("Benchmark Go Fibonacci Heap", func(b Benchmarker) {
 			rand.Seed(time.Now().Unix())
 			b.Time("1000000 radom operations", func() {
 				var (
