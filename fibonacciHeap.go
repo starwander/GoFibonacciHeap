@@ -219,7 +219,7 @@ func (heap *fibHeap) consolidate() {
 		return
 	}
 
-	treeDegrees := make(map[uint]*list.Element)
+	treeDegrees := make(map[uint]*list.Element, heap.maxPossibleNum())
 
 	for tree := heap.roots.Front(); tree != nil; {
 		degree := tree.Value.(*Node).degree
@@ -252,6 +252,15 @@ func (heap *fibHeap) consolidate() {
 	}
 
 	heap.resetMin()
+}
+
+func (heap *fibHeap) maxPossibleNum() int {
+	maxPossibleRootNum := (int)(math.Ceil(-1 + math.Sqrt(float64(1+8*heap.num))/2))
+	if heap.roots.Len() < maxPossibleRootNum {
+		return heap.roots.Len()
+	} else {
+		return maxPossibleRootNum
+	}
 }
 
 func (heap *fibHeap) link(parent, child *list.Element) {
