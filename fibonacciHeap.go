@@ -106,7 +106,7 @@ func (heap *FibHeap) Minimum() Value {
 	return heap.min.value
 }
 
-// ExtractMin returns the current minimum value by key in the heap and then extracts the value from the heap.
+// ExtractMin returns the current minimum value in the heap and then extracts the value from the heap.
 // An empty heap will return nil and extracts nothing.
 func (heap *FibHeap) ExtractMin() Value {
 	if heap.num == 0 {
@@ -136,7 +136,7 @@ func (heap *FibHeap) ExtractMin() Value {
 	return min.value
 }
 
-// Union merges the input heap into.
+// Union merges the input heap in.
 // All values of the input heap must not have duplicate tags. Otherwise an error will be returned.
 func (heap *FibHeap) Union(anotherHeap *FibHeap) error {
 	for tag := range anotherHeap.index {
@@ -152,7 +152,7 @@ func (heap *FibHeap) Union(anotherHeap *FibHeap) error {
 	return nil
 }
 
-// DecreaseKey will update the value in the heap by the input value.
+// DecreaseKey updates the value in the heap by the input value.
 // If the input value has a larger key or -inf key, an error will be returned.
 // If the tag of the input value is not existed in the heap, an error will be returned.
 // DecreaseKey will check the nil interface but not the interface with nil value.
@@ -173,7 +173,7 @@ func (heap *FibHeap) DecreaseKey(value Value) error {
 	return errors.New("Value is not found")
 }
 
-// Delete will delete the value in the heap by the input value.
+// Delete deletes the value in the heap by the input value.
 // If the tag of the input value is not existed in the heap, an error will be returned.
 // Delete will check the nil interface but not the interface with nil value.
 // Try to input of an interface with nil value will cause invalid address panic.
