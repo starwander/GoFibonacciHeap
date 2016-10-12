@@ -6,7 +6,7 @@
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0)
 
 GoFibonacciHeap is a [Golang](https://golang.org/) implementation of [Fibonacci Heap](https://en.wikipedia.org/wiki/Fibonacci_heap).
-This implementation is a bit different from the traditional Fibonacci Heap by having an index map inside.
+This implementation is a bit different from the traditional Fibonacci Heap with an index map inside.
 Thanks to the index map, the internal struct 'node' no longer need to be exposed outsides the package.
 The index map also makes the random access to the values in the heap possible.
 But the union operation of this implementation is O(n) rather than O(1) of the traditional implementation.
@@ -22,7 +22,7 @@ But the union operation of this implementation is O(n) rather than O(1) of the t
 
     go get github.com/EthanZhuang/GoFibonacciHeap
 
-#####Inmplement Value interface of this package for all values going to be inserted
+#####Implements Value interface of this package for all values going to be inserted
 ```go
 // Value is the interface that all values push into or pop from the FibHeap must implement.
 type Value interface {
@@ -40,11 +40,11 @@ type Value interface {
 * Minimum: returns the current minimum value in the heap by key.
 * ExtractMin: returns the current minimum value in the heap and then extracts the value from the heap.
 * Union: merges the input heap in.
-* DecreaseKey: updates the value in the heap by the input value.
-* Delete: deletes the value in the heap by the input value.
+* DecreaseKey: decreases and updates the value in the heap by the input.
+* Delete: deletes the value in the heap by the input.
 * GetTag: searches and returns the value in the heap by the input tag.
 * ExtractTag: searches and extracts the value in the heap by the input tag.
-* Num: returns the total number of values in the heap.
+* Num: returns the current total number of values in the heap.
 * String: provides some basic debug information of the heap.
 
 ## Example
@@ -103,5 +103,4 @@ func main() {
 
 ## LICENSE
 
-GoFibonacciHeap source code is licensed under the Apache Licence, Version 2.0
-(http://www.apache.org/licenses/LICENSE-2.0.html).
+GoFibonacciHeap source code is licensed under the [Apache Licence, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.html).
