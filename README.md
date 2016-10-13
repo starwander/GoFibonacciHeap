@@ -1,4 +1,4 @@
-## GoFibonacciHeap
+## Golang Fibonacci Heap
 [![Build Status](https://travis-ci.org/EthanZhuang/GoFibonacciHeap.svg?branch=master)](https://travis-ci.org/EthanZhuang/GoFibonacciHeap)
 [![codecov](https://codecov.io/gh/EthanZhuang/GoFibonacciHeap/branch/master/graph/badge.svg)](https://codecov.io/gh/EthanZhuang/GoFibonacciHeap)
 [![Go Report Card](https://goreportcard.com/badge/github.com/EthanZhuang/GoFibonacciHeap)](https://goreportcard.com/report/github.com/EthanZhuang/GoFibonacciHeap)
