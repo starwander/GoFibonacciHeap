@@ -283,15 +283,6 @@ func (heap *FibHeap) consolidate() {
 	heap.resetMin()
 }
 
-func (heap *FibHeap) maxPossibleNum() int {
-	maxPossibleRootNum := (int)(math.Ceil(-1 + math.Sqrt(float64(1+8*heap.num))/2))
-	if heap.roots.Len() < maxPossibleRootNum {
-		return heap.roots.Len()
-	}
-
-	return maxPossibleRootNum
-}
-
 func (heap *FibHeap) link(parent, child *node) {
 	child.marked = false
 	child.parent = parent
