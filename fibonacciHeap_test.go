@@ -444,8 +444,8 @@ var _ = Describe("Tests of fibHeap", func() {
 			rand.Seed(time.Now().Unix())
 			b.Time("1000000 radom operations", func() {
 				var (
-					insert, minimun, extract, decrease, delete int64
-					temp                                       *demoStruct
+					insert, minimun, extract, decrease, get, delete int64
+					min                                             *demoStruct
 				)
 				for i := 0; i < 1000000; i++ {
 					if i%3 == 0 {
@@ -453,40 +453,64 @@ var _ = Describe("Tests of fibHeap", func() {
 						demo.tag = i
 						demo.key = rand.Float64()
 						demo.value = fmt.Sprint(demo.key)
-						if heap.Insert(demo) == nil {
-							insert++
+						Expect(heap.Insert(demo)).ShouldNot(HaveOccurred())
+						insert++
+						if min == nil || demo.key < min.key {
+							min = demo
 						}
 					}
 					if i%5 == 0 {
-						if heap.ExtractMin() != nil {
+						if extracted := heap.ExtractMin(); extracted != nil {
 							extract++
-						}
-					}
-					if i%7 == 0 {
-						min := heap.Minimum()
-						if min != nil {
-							temp = min.(*demoStruct)
-							minimun++
-						}
-					}
-					if i%11 == 0 {
-						if temp != nil {
-							temp.key = temp.key / 2
-							if heap.DecreaseKey(temp) == nil {
-								decrease++
+							Expect(extracted.(*demoStruct).key).Should(BeEquivalentTo(min.key))
+							if currentMin := heap.Minimum(); currentMin != nil {
+								minimun++
+								min = currentMin.(*demoStruct)
+							} else {
+								Expect(heap.Num()).Should(BeEquivalentTo(0))
+								min = nil
 							}
 						}
 					}
+					if i%7 == 0 {
+						if currentMin := heap.Minimum(); currentMin != nil {
+							if min != nil {
+								minimun++
+								Expect(currentMin.(*demoStruct).key).Should(BeEquivalentTo(min.key))
+							}
+						}
+					}
+					if i%11 == 0 {
+						if temp := heap.GetTag(int(3 * rand.Int31n(int32(i/3)+1))); temp != nil {
+							get++
+							temp.(*demoStruct).key = temp.(*demoStruct).key / 2
+							heap.DecreaseKey(temp)
+							decrease++
+							currentMin := heap.Minimum()
+							Expect(currentMin).ShouldNot(BeNil())
+							minimun++
+							min = currentMin.(*demoStruct)
+						}
+					}
 					if i%13 == 0 {
-						if temp != nil {
-							if heap.Delete(temp) == nil {
-								delete++
+						if temp := heap.GetTag(int(3 * rand.Int31n(int32(i/3)+1))); temp != nil {
+							get++
+							heap.Delete(temp)
+							delete++
+							if min != nil && temp.Tag() == min.tag {
+								if currentMin := heap.Minimum(); currentMin != nil {
+									minimun++
+									min = currentMin.(*demoStruct)
+								} else {
+									Expect(heap.Num()).Should(BeEquivalentTo(0))
+									min = nil
+								}
 							}
 						}
 					}
 				}
 				fmt.Println("Final heap size:", heap.Num())
-				fmt.Println("Total insert:", insert, "Total minimun:", minimun, "Total extract:", extract, "Total decrease:", decrease, "Total delete:", delete)
+				fmt.Println("Total insert:", insert, "Total minimun:", minimun, "Total extract:", extract, "Total get:", get, "Total decrease:", decrease, "Total delete:", delete)
 				Expect(heap.Num()).Should(BeEquivalentTo(insert - extract - delete))
 			})
 		}, 10)
