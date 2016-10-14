@@ -25,10 +25,11 @@ type Value interface {
 // FibHeap represents a Fibonacci Heap.
 // Please note that all methods of FibHeap are not concurrent safe.
 type FibHeap struct {
-	roots *list.List
-	index map[interface{}]*node
-	min   *node
-	num   uint
+	roots       *list.List
+	index       map[interface{}]*node
+	treeDegrees map[uint]*list.Element
+	min         *node
+	num         uint
 }
 
 type node struct {
@@ -37,6 +38,7 @@ type node struct {
 	children *list.List
 	marked   bool
 	degree   uint
+	position uint
 	tag      interface{}
 	key      float64
 	value    Value
@@ -47,6 +49,7 @@ func NewFibHeap() *FibHeap {
 	heap := new(FibHeap)
 	heap.roots = list.New()
 	heap.index = make(map[interface{}]*node)
+	heap.treeDegrees = make(map[uint]*list.Element)
 	heap.num = 0
 	heap.min = nil
 
@@ -124,6 +127,7 @@ func (heap *FibHeap) ExtractMin() Value {
 	}
 
 	heap.roots.Remove(heap.min.self)
+	heap.treeDegrees[min.position] = nil
 	delete(heap.index, heap.min.tag)
 	heap.num--
 
@@ -243,25 +247,26 @@ func probeTree(buffer *bytes.Buffer, tree *list.List) {
 }
 
 func (heap *FibHeap) consolidate() {
-	treeDegrees := make(map[uint]*list.Element, heap.maxPossibleNum())
+	for tree := heap.roots.Front(); tree != nil; tree = tree.Next() {
+		heap.treeDegrees[tree.Value.(*node).position] = nil
+	}
 
 	for tree := heap.roots.Front(); tree != nil; {
-		degree := tree.Value.(*node).degree
-
-		if treeDegrees[degree] == nil {
-			treeDegrees[degree] = tree
+		if heap.treeDegrees[tree.Value.(*node).degree] == nil {
+			heap.treeDegrees[tree.Value.(*node).degree] = tree
+			tree.Value.(*node).position = tree.Value.(*node).degree
 			tree = tree.Next()
 			continue
 		}
 
-		if treeDegrees[degree] == tree {
+		if heap.treeDegrees[tree.Value.(*node).degree] == tree {
 			tree = tree.Next()
 			continue
 		}
 
-		for treeDegrees[degree] != nil {
-			anotherTree := treeDegrees[degree]
-			treeDegrees[degree] = nil
+		for heap.treeDegrees[tree.Value.(*node).degree] != nil {
+			anotherTree := heap.treeDegrees[tree.Value.(*node).degree]
+			heap.treeDegrees[tree.Value.(*node).degree] = nil
 			if tree.Value.(*node).key <= anotherTree.Value.(*node).key {
 				heap.roots.Remove(anotherTree)
 				heap.link(tree.Value.(*node), anotherTree.Value.(*node))
@@ -270,9 +275,9 @@ func (heap *FibHeap) consolidate() {
 				heap.link(anotherTree.Value.(*node), tree.Value.(*node))
 				tree = anotherTree
 			}
-			degree++
 		}
-		treeDegrees[degree] = tree
+		heap.treeDegrees[tree.Value.(*node).degree] = tree
+		tree.Value.(*node).position = tree.Value.(*node).degree
 	}
 
 	heap.resetMin()
