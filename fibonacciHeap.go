@@ -12,7 +12,7 @@ import (
 	"math"
 )
 
-// Value is the interface that all values push into or pop from the FibHeap must implement.
+// Value is the interface that all values push into or pop from the FibHeap by value interfaces must implement.
 type Value interface {
 	// Tag returns the unique tag of the value.
 	// The tag is used in the index map.
@@ -61,47 +61,50 @@ func (heap *FibHeap) Num() uint {
 	return heap.num
 }
 
-// Insert pushes the input value into the heap.
+// Insert pushes the input tag and key into the heap.
+// Try to insert a duplicate tag value will cause an error return.
+// The valid range of the key is (-inf, +inf].
+// Try to insert a -inf key value will cause an error return.
+// Insert will check the nil interface but not the interface with nil value.
+// Try to input of an interface with nil value will cause invalid address panic.
+func (heap *FibHeap) Insert(tag interface{}, key float64) error {
+	if tag == nil {
+		return errors.New("Input tag is nil.")
+	}
+
+	return heap.insert(tag, key, nil)
+}
+
+// InsertValue pushes the input value into the heap.
 // The input value must implements the Value interface.
 // Try to insert a duplicate tag value will cause an error return.
 // The valid range of the value's key is (-inf, +inf].
 // Try to insert a -inf key value will cause an error return.
 // Insert will check the nil interface but not the interface with nil value.
 // Try to input of an interface with nil value will cause invalid address panic.
-func (heap *FibHeap) Insert(value Value) error {
+func (heap *FibHeap) InsertValue(value Value) error {
 	if value == nil {
 		return errors.New("Input value is nil.")
 	}
 
-	if math.IsInf(value.Key(), -1) {
-		return errors.New("Negative infinity key is reserved for internal usage.")
-	}
-
-	if _, exists := heap.index[value.Tag()]; exists {
-		return errors.New("Duplicate tag is not allowed")
-	}
-
-	node := new(node)
-	node.children = list.New()
-	node.tag = value.Tag()
-	node.key = value.Key()
-	node.value = value
-
-	node.self = heap.roots.PushBack(node)
-	heap.index[node.tag] = node
-	heap.num++
-
-	if heap.min == nil || heap.min.key > node.key {
-		heap.min = node
-	}
-
-	return nil
+	return heap.insert(value.Tag(), value.Key(), value)
 }
 
-// Minimum returns the current minimum value in the heap by key.
-// Minimum will not extract the value so the value will still exists in the heap.
+// Minimum returns the current minimum tag and key in the heap sorted by the key.
+// Minimum will not extract the tag and key so the value will still exists in the heap.
+// An empty heap will return nil and -inf.
+func (heap *FibHeap) Minimum() (interface{}, float64) {
+	if heap.num == 0 {
+		return nil, math.Inf(-1)
+	}
+
+	return heap.min.tag, heap.min.key
+}
+
+// MinimumValue returns the current minimum value in the heap sorted by the key.
+// MinimumValue will not extract the value so the value will still exists in the heap.
 // An empty heap will return nil.
-func (heap *FibHeap) Minimum() Value {
+func (heap *FibHeap) MinimumValue() Value {
 	if heap.num == 0 {
 		return nil
 	}
@@ -109,33 +112,26 @@ func (heap *FibHeap) Minimum() Value {
 	return heap.min.value
 }
 
-// ExtractMin returns the current minimum value in the heap and then extracts the value from the heap.
+// ExtractMin returns the current minimum tag and key in the heap and then extracts them from the heap.
+// An empty heap will return nil/-inf and extracts nothing.
+func (heap *FibHeap) ExtractMin() (interface{}, float64) {
+	if heap.num == 0 {
+		return nil, math.Inf(-1)
+	}
+
+	min := heap.extractMin()
+
+	return min.tag, min.key
+}
+
+// ExtractMinValue returns the current minimum value in the heap and then extracts it from the heap.
 // An empty heap will return nil and extracts nothing.
-func (heap *FibHeap) ExtractMin() Value {
+func (heap *FibHeap) ExtractMinValue() Value {
 	if heap.num == 0 {
 		return nil
 	}
 
-	min := heap.min
-
-	children := heap.min.children
-	if children != nil {
-		for e := children.Front(); e != nil; e = e.Next() {
-			e.Value.(*node).parent = nil
-			e.Value.(*node).self = heap.roots.PushBack(e.Value.(*node))
-		}
-	}
-
-	heap.roots.Remove(heap.min.self)
-	heap.treeDegrees[min.position] = nil
-	delete(heap.index, heap.min.tag)
-	heap.num--
-
-	if heap.num == 0 {
-		heap.min = nil
-	} else {
-		heap.consolidate()
-	}
+	min := heap.extractMin()
 
 	return min.value
 }
@@ -150,18 +146,39 @@ func (heap *FibHeap) Union(anotherHeap *FibHeap) error {
 	}
 
 	for _, node := range anotherHeap.index {
-		heap.Insert(node.value)
+		heap.InsertValue(node.value)
 	}
 
 	return nil
 }
 
-// DecreaseKey updates the value in the heap by the input value.
-// If the input value has a larger key or -inf key, an error will be returned.
-// If the tag of the input value is not existed in the heap, an error will be returned.
+// DecreaseKey updates the tag in the heap by the input key.
+// If the input key has a larger key or -inf key, an error will be returned.
+// If the input tag is not existed in the heap, an error will be returned.
 // DecreaseKey will check the nil interface but not the interface with nil value.
 // Try to input of an interface with nil value will cause invalid address panic.
-func (heap *FibHeap) DecreaseKey(value Value) error {
+func (heap *FibHeap) DecreaseKey(tag interface{}, key float64) error {
+	if tag == nil {
+		return errors.New("Input tag is nil.")
+	}
+
+	if math.IsInf(key, -1) {
+		return errors.New("Negative infinity key is reserved for internal usage.")
+	}
+
+	if node, exists := heap.index[tag]; exists {
+		return heap.decreaseKey(node, nil, key)
+	}
+
+	return errors.New("Value is not found")
+}
+
+// DecreaseKeyValue updates the value in the heap by the input value.
+// If the input value has a larger key or -inf key, an error will be returned.
+// If the tag of the input value is not existed in the heap, an error will be returned.
+// DecreaseKeyValue will check the nil interface but not the interface with nil value.
+// Try to input of an interface with nil value will cause invalid address panic.
+func (heap *FibHeap) DecreaseKeyValue(value Value) error {
 	if value == nil {
 		return errors.New("Input value is nil.")
 	}
@@ -177,11 +194,29 @@ func (heap *FibHeap) DecreaseKey(value Value) error {
 	return errors.New("Value is not found")
 }
 
-// Delete deletes the value in the heap by the input value.
-// If the tag of the input value is not existed in the heap, an error will be returned.
+// Delete deletes the input tag in the heap.
+// If the input tag is not existed in the heap, an error will be returned.
 // Delete will check the nil interface but not the interface with nil value.
 // Try to input of an interface with nil value will cause invalid address panic.
-func (heap *FibHeap) Delete(value Value) error {
+func (heap *FibHeap) Delete(tag interface{}) error {
+	if tag == nil {
+		return errors.New("Input tag is nil.")
+	}
+
+	if _, exists := heap.index[tag]; !exists {
+		return errors.New("Tag is not found")
+	}
+
+	heap.ExtractValue(tag)
+
+	return nil
+}
+
+// DeleteValue deletes the value in the heap by the input value.
+// If the tag of the input value is not existed in the heap, an error will be returned.
+// DeleteValue will check the nil interface but not the interface with nil value.
+// Try to input of an interface with nil value will cause invalid address panic.
+func (heap *FibHeap) DeleteValue(value Value) error {
 	if value == nil {
 		return errors.New("Input value is nil.")
 	}
@@ -190,15 +225,26 @@ func (heap *FibHeap) Delete(value Value) error {
 		return errors.New("Value is not found")
 	}
 
-	heap.ExtractTag(value.Tag())
+	heap.ExtractValue(value.Tag())
 
 	return nil
 }
 
-// GetTag searches and returns the value in the heap by the input tag.
+// GetTag searches and returns the key in the heap by the input tag.
 // If the input tag does not exist in the heap, nil will be returned.
 // GetTag will not extract the value so the value will still exist in the heap.
-func (heap *FibHeap) GetTag(tag interface{}) (value Value) {
+func (heap *FibHeap) GetTag(tag interface{}) (key float64) {
+	if node, exists := heap.index[tag]; exists {
+		key = node.key
+	}
+
+	return math.Inf(-1)
+}
+
+// GetValue searches and returns the value in the heap by the input tag.
+// If the input tag does not exist in the heap, nil will be returned.
+// GetValue will not extract the value so the value will still exist in the heap.
+func (heap *FibHeap) GetValue(tag interface{}) (value Value) {
 	if node, exists := heap.index[tag]; exists {
 		value = node.value
 	}
@@ -206,18 +252,30 @@ func (heap *FibHeap) GetTag(tag interface{}) (value Value) {
 	return
 }
 
-// ExtractTag searches and extracts the value in the heap by the input tag.
+// ExtractTag searches and extracts the tag/key in the heap by the input tag.
 // If the input tag does not exist in the heap, nil will be returned.
 // ExtractTag will extract the value so the value will no longer exist in the heap.
-func (heap *FibHeap) ExtractTag(tag interface{}) (value Value) {
-	if node, exists := heap.index[tag]; exists {
-		heap.decreaseKey(node, node.value, math.Inf(-1))
-		heap.ExtractMin()
-		value = node.value
-		return
+func (heap *FibHeap) ExtractTag(tag interface{}) (key float64) {
+	node := heap.extractNode(tag)
+
+	if node == nil {
+		return math.Inf(-1)
 	}
 
-	return
+	return node.key
+}
+
+// ExtractValue searches and extracts the value in the heap by the input tag.
+// If the input tag does not exist in the heap, nil will be returned.
+// ExtractValue will extract the value so the value will no longer exist in the heap.
+func (heap *FibHeap) ExtractValue(tag interface{}) (value Value) {
+	node := heap.extractNode(tag)
+
+	if node == nil {
+		return nil
+	}
+
+	return node.value
 }
 
 // String provides some basic debug information of the heap.
@@ -281,6 +339,67 @@ func (heap *FibHeap) consolidate() {
 	}
 
 	heap.resetMin()
+}
+
+func (heap *FibHeap) insert(tag interface{}, key float64, value Value) error {
+	if math.IsInf(key, -1) {
+		return errors.New("Negative infinity key is reserved for internal usage.")
+	}
+
+	if _, exists := heap.index[tag]; exists {
+		return errors.New("Duplicate tag is not allowed")
+	}
+
+	node := new(node)
+	node.children = list.New()
+	node.tag = tag
+	node.key = key
+	node.value = value
+
+	node.self = heap.roots.PushBack(node)
+	heap.index[node.tag] = node
+	heap.num++
+
+	if heap.min == nil || heap.min.key > node.key {
+		heap.min = node
+	}
+
+	return nil
+}
+
+func (heap *FibHeap) extractMin() *node {
+	min := heap.min
+
+	children := heap.min.children
+	if children != nil {
+		for e := children.Front(); e != nil; e = e.Next() {
+			e.Value.(*node).parent = nil
+			e.Value.(*node).self = heap.roots.PushBack(e.Value.(*node))
+		}
+	}
+
+	heap.roots.Remove(heap.min.self)
+	heap.treeDegrees[min.position] = nil
+	delete(heap.index, heap.min.tag)
+	heap.num--
+
+	if heap.num == 0 {
+		heap.min = nil
+	} else {
+		heap.consolidate()
+	}
+
+	return min
+}
+
+func (heap *FibHeap) extractNode(tag interface{}) *node {
+	if node, exists := heap.index[tag]; exists {
+		heap.decreaseKey(node, node.value, math.Inf(-1))
+		heap.ExtractMinValue()
+		return node
+	}
+
+	return nil
 }
 
 func (heap *FibHeap) link(parent, child *node) {
