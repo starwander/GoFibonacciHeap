@@ -22,9 +22,9 @@ But the union operation of this implementation is O(n) rather than O(1) of the t
 
     go get github.com/EthanZhuang/GoFibonacciHeap
 
-#####Implements Value interface of this package for all values going to be inserted
+#####Implements Value interface of this package for all values going to be inserted by value interfaces
 ```go
-// Value is the interface that all values push into or pop from the FibHeap must implement.
+// Value is the interface that all values push into or pop from the FibHeap by value interfaces must implement.
 type Value interface {
 	// Tag returns the unique tag of the value.
 	// The tag is used in the index map.
@@ -36,16 +36,28 @@ type Value interface {
 ```
 ## Supported Operations
 
-* Insert: pushes the input value into the heap.
-* Minimum: returns the current minimum value in the heap by key.
-* ExtractMin: returns the current minimum value in the heap and then extracts the value from the heap.
-* Union: merges the input heap in.
-* DecreaseKey: decreases and updates the value in the heap by the input.
-* Delete: deletes the value in the heap by the input.
-* GetTag: searches and returns the value in the heap by the input tag.
-* ExtractTag: searches and extracts the value in the heap by the input tag.
-* Num: returns the current total number of values in the heap.
-* String: provides some basic debug information of the heap.
+* Interfaces use tag/key as inputs, treating heap as a priority queue only
+ - Insert: pushes the input tag/key into the heap.
+ - Minimum: returns the current minimum tag/key in the heap sorted by key.
+ - ExtractMin: returns the current minimum tag/key in the heap and then extracts them from the heap.
+ - DecreaseKey: decreases and updates the tag in the heap by the input key.
+ - Delete: deletes the tag in the heap by the input.
+ - GetTag: searches and returns the tag/key in the heap by the input tag.
+ - ExtractTag: searches and extracts the tag/key in the heap by the input tag.
+
+* Interfaces use value(Value interface) as inputs, treating heap as a priority queue and a value storage.
+ - InsertValue: pushes the input value into the heap.
+ - MinimumValue: returns the current minimum value in the heap sorted by key.
+ - ExtractMinValue: returns the current minimum value in the heap and then extracts the value from the heap.
+ - DecreaseKeyValue: decreases and updates the value in the heap by the input.
+ - DeleteValue: deletes the value in the heap by the input.
+ - GetValue: searches and returns the value in the heap by the input tag.
+ - ExtractValue: searches and extracts the value in the heap by the input tag.
+
+* Common interfaces
+ - Union: merges the input heap in.
+ - Num: returns the current total number of values in the heap.
+ - String: provides some basic debug information of the heap.
 
 ## Example
 
