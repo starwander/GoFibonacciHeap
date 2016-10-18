@@ -235,7 +235,7 @@ func (heap *FibHeap) DeleteValue(value Value) error {
 // GetTag will not extract the value so the value will still exist in the heap.
 func (heap *FibHeap) GetTag(tag interface{}) (key float64) {
 	if node, exists := heap.index[tag]; exists {
-		key = node.key
+		return node.key
 	}
 
 	return math.Inf(-1)
@@ -256,26 +256,26 @@ func (heap *FibHeap) GetValue(tag interface{}) (value Value) {
 // If the input tag does not exist in the heap, nil will be returned.
 // ExtractTag will extract the value so the value will no longer exist in the heap.
 func (heap *FibHeap) ExtractTag(tag interface{}) (key float64) {
-	node := heap.extractNode(tag)
-
-	if node == nil {
-		return math.Inf(-1)
+	if node, exists := heap.index[tag]; exists {
+		key = node.key
+		heap.deleteNode(node)
+		return
 	}
 
-	return node.key
+	return math.Inf(-1)
 }
 
 // ExtractValue searches and extracts the value in the heap by the input tag.
 // If the input tag does not exist in the heap, nil will be returned.
 // ExtractValue will extract the value so the value will no longer exist in the heap.
 func (heap *FibHeap) ExtractValue(tag interface{}) (value Value) {
-	node := heap.extractNode(tag)
-
-	if node == nil {
-		return nil
+	if node, exists := heap.index[tag]; exists {
+		value = node.value
+		heap.deleteNode(node)
+		return
 	}
 
-	return node.value
+	return nil
 }
 
 // String provides some basic debug information of the heap.
@@ -392,14 +392,9 @@ func (heap *FibHeap) extractMin() *node {
 	return min
 }
 
-func (heap *FibHeap) extractNode(tag interface{}) *node {
-	if node, exists := heap.index[tag]; exists {
-		heap.decreaseKey(node, node.value, math.Inf(-1))
-		heap.ExtractMinValue()
-		return node
-	}
-
-	return nil
+func (heap *FibHeap) deleteNode(node *node) {
+	heap.decreaseKey(node, node.value, math.Inf(-1))
+	heap.ExtractMinValue()
 }
 
 func (heap *FibHeap) link(parent, child *node) {

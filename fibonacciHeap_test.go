@@ -428,7 +428,88 @@ var _ = Describe("Tests of fibHeap", func() {
 		})
 	})
 
-	Context("index tests", func() {
+	Context("index tests of tag/key interfaces", func() {
+		BeforeEach(func() {
+			heap = NewFibHeap()
+			anotherHeap = NewFibHeap()
+		})
+
+		AfterEach(func() {
+			heap = nil
+			anotherHeap = nil
+		})
+
+		It("Given one fibHeap, when Insert values with same tag, it should return an error.", func() {
+			err := heap.Insert(1, float64(1))
+			Expect(err).ShouldNot(HaveOccurred())
+			_, minKey := heap.Minimum()
+			Expect(minKey).Should(BeEquivalentTo(1))
+			Expect(heap.Num()).Should(BeEquivalentTo(1))
+			err = heap.Insert(1, float64(10))
+			Expect(err).Should(HaveOccurred())
+			_, minKey = heap.Minimum()
+			Expect(minKey).Should(BeEquivalentTo(1))
+			Expect(heap.Num()).Should(BeEquivalentTo(1))
+		})
+
+		It("Given two fibHeaps which both has value with same tag, when call Union, it should return an error.", func() {
+			heap.Insert(1, float64(1))
+			anotherHeap.Insert(1, float64(10))
+
+			err := heap.Union(anotherHeap)
+			Expect(err).Should(HaveOccurred())
+			_, minKey := heap.Minimum()
+			Expect(minKey).Should(BeEquivalentTo(1))
+			Expect(heap.Num()).Should(BeEquivalentTo(1))
+			_, anotherMinKey := anotherHeap.Minimum()
+			Expect(anotherMinKey).Should(BeEquivalentTo(10))
+			Expect(anotherHeap.Num()).Should(BeEquivalentTo(1))
+		})
+
+		It("Given one fibHeaps which has not a value with TAG, when GetTag this TAG, it should return nil.", func() {
+			rand.Seed(time.Now().Unix())
+			for i := 0; i < 1000; i++ {
+				heap.Insert(i, rand.Float64())
+			}
+
+			Expect(heap.GetValue(10000)).Should(BeNil())
+		})
+
+		It("Given one fibHeaps which has a value with TAG, when GetTag this TAG, it should return the value with this TAG.", func() {
+			rand.Seed(time.Now().Unix())
+			for i := 0; i < 1000; i++ {
+				heap.Insert(i, rand.Float64())
+			}
+			heap.Insert(10000, float64(10000))
+
+			Expect(heap.GetTag(10000)).Should(BeEquivalentTo(10000))
+			Expect(heap.Num()).Should(BeEquivalentTo(1001))
+		})
+
+		It("Given one fibHeaps which has not a value with TAG, when ExtractTag this TAG, it should return nil.", func() {
+			for i := 0; i < 1000; i++ {
+				heap.Insert(i, rand.Float64())
+			}
+			Expect(heap.Num()).Should(BeEquivalentTo(1000))
+
+			Expect(heap.ExtractTag(1000)).Should(BeEquivalentTo(math.Inf(-1)))
+			Expect(heap.Num()).Should(BeEquivalentTo(1000))
+		})
+
+		It("Given one fibHeaps which has a value with TAG, when ExtractTag this TAG, it should extract the value with this TAG from the heap.", func() {
+			for i := 0; i < 1000; i++ {
+				heap.Insert(i, float64(i))
+			}
+			Expect(heap.Num()).Should(BeEquivalentTo(1000))
+
+			Expect(heap.ExtractTag(999)).Should(BeEquivalentTo(999))
+			Expect(heap.Num()).Should(BeEquivalentTo(999))
+			_, minKey := heap.Minimum()
+			Expect(minKey).Should(BeEquivalentTo(0))
+		})
+	})
+
+	Context("index tests of value interfaces", func() {
 		BeforeEach(func() {
 			heap = NewFibHeap()
 			anotherHeap = NewFibHeap()
