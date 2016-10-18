@@ -472,7 +472,7 @@ var _ = Describe("Tests of fibHeap", func() {
 				heap.Insert(i, rand.Float64())
 			}
 
-			Expect(heap.GetValue(10000)).Should(BeNil())
+			Expect(heap.GetTag(10000)).Should(BeEquivalentTo(math.Inf(-1)))
 		})
 
 		It("Given one fibHeaps which has a value with TAG, when GetTag this TAG, it should return the value with this TAG.", func() {
@@ -555,7 +555,7 @@ var _ = Describe("Tests of fibHeap", func() {
 			Expect(anotherHeap.Num()).Should(BeEquivalentTo(1))
 		})
 
-		It("Given one fibHeaps which has not a value with TAG, when GetTag this TAG, it should return nil.", func() {
+		It("Given one fibHeaps which has not a value with TAG, when GetValue this TAG, it should return nil.", func() {
 			rand.Seed(time.Now().Unix())
 			for i := 0; i < 1000; i++ {
 				demo := new(demoStruct)
@@ -568,7 +568,7 @@ var _ = Describe("Tests of fibHeap", func() {
 			Expect(heap.GetValue(10000)).Should(BeNil())
 		})
 
-		It("Given one fibHeaps which has a value with TAG, when GetTag this TAG, it should return the value with this TAG.", func() {
+		It("Given one fibHeaps which has a value with TAG, when GetValue this TAG, it should return the value with this TAG.", func() {
 			rand.Seed(time.Now().Unix())
 			for i := 0; i < 1000; i++ {
 				demo := new(demoStruct)
@@ -587,7 +587,7 @@ var _ = Describe("Tests of fibHeap", func() {
 			Expect(heap.Num()).Should(BeEquivalentTo(1001))
 		})
 
-		It("Given one fibHeaps which has not a value with TAG, when ExtractTag this TAG, it should return nil.", func() {
+		It("Given one fibHeaps which has not a value with TAG, when ExtractValue this TAG, it should return nil.", func() {
 			for i := 0; i < 1000; i++ {
 				demo := new(demoStruct)
 				demo.tag = i
@@ -601,7 +601,7 @@ var _ = Describe("Tests of fibHeap", func() {
 			Expect(heap.Num()).Should(BeEquivalentTo(1000))
 		})
 
-		It("Given one fibHeaps which has a value with TAG, when ExtractTag this TAG, it should extract the value with this TAG from the heap.", func() {
+		It("Given one fibHeaps which has a value with TAG, when ExtractValue this TAG, it should extract the value with this TAG from the heap.", func() {
 			for i := 0; i < 1000; i++ {
 				demo := new(demoStruct)
 				demo.tag = i
