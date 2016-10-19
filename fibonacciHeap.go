@@ -405,11 +405,10 @@ func (heap *FibHeap) link(parent, child *node) {
 }
 
 func (heap *FibHeap) resetMin() {
-	key := math.Inf(1)
-	for tree := heap.roots.Front(); tree != nil; tree = tree.Next() {
-		if tree.Value.(*node).key < key {
+	heap.min = heap.roots.Front().Value.(*node)
+	for tree := heap.min.self.Next(); tree != nil; tree = tree.Next() {
+		if tree.Value.(*node).key < heap.min.key {
 			heap.min = tree.Value.(*node)
-			key = tree.Value.(*node).key
 		}
 	}
 }
