@@ -284,11 +284,15 @@ func (heap *FibHeap) ExtractValue(tag interface{}) (value Value) {
 func (heap *FibHeap) String() string {
 	var buffer bytes.Buffer
 
-	buffer.WriteString(fmt.Sprintf("Total number: %d, Root Size: %d, Index size: %d,\n", heap.num, heap.roots.Len(), len(heap.index)))
-	buffer.WriteString(fmt.Sprintf("Current minimun: key(%f), tag(%v), value(%v),\n", heap.min.key, heap.min.tag, heap.min.value))
-	buffer.WriteString(fmt.Sprintf("Heap detail:\n"))
-	probeTree(&buffer, heap.roots)
-	buffer.WriteString(fmt.Sprintf("\n"))
+	if heap.num != 0 {
+		buffer.WriteString(fmt.Sprintf("Total number: %d, Root Size: %d, Index size: %d,\n", heap.num, heap.roots.Len(), len(heap.index)))
+		buffer.WriteString(fmt.Sprintf("Current minimun: key(%f), tag(%v), value(%v),\n", heap.min.key, heap.min.tag, heap.min.value))
+		buffer.WriteString(fmt.Sprintf("Heap detail:\n"))
+		probeTree(&buffer, heap.roots)
+		buffer.WriteString(fmt.Sprintf("\n"))
+	} else {
+		buffer.WriteString(fmt.Sprintf("Heap is empty.\n"))
+	}
 
 	return buffer.String()
 }
