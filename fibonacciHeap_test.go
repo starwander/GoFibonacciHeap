@@ -627,6 +627,7 @@ var _ = Describe("Tests of fibHeap", func() {
 		})
 
 		It("Given one fibHeaps which some values, when call String api, it should retern the internal debug string.", func() {
+			Expect(heap.String()).Should(BeEquivalentTo("Heap is empty.\n"))
 			for i := 1; i < 5; i++ {
 				for j := 10; j < 15; j++ {
 					demo := new(demoStruct)
