@@ -1,8 +1,8 @@
 ## Golang Fibonacci Heap
-[![Build Status](https://travis-ci.org/EthanZhuang/GoFibonacciHeap.svg?branch=master)](https://travis-ci.org/EthanZhuang/GoFibonacciHeap)
-[![codecov](https://codecov.io/gh/EthanZhuang/GoFibonacciHeap/branch/master/graph/badge.svg)](https://codecov.io/gh/EthanZhuang/GoFibonacciHeap)
-[![Go Report Card](https://goreportcard.com/badge/github.com/EthanZhuang/GoFibonacciHeap)](https://goreportcard.com/report/github.com/EthanZhuang/GoFibonacciHeap)
-[![GoDoc](https://godoc.org/github.com/EthanZhuang/GoFibonacciHeap?status.svg)](https://godoc.org/github.com/EthanZhuang/GoFibonacciHeap)
+[![Build Status](https://travis-ci.org/starwander/GoFibonacciHeap.svg?branch=master)](https://travis-ci.org/starwander/GoFibonacciHeap)
+[![codecov](https://codecov.io/gh/starwander/GoFibonacciHeap/branch/master/graph/badge.svg)](https://codecov.io/gh/starwander/GoFibonacciHeap)
+[![Go Report Card](https://goreportcard.com/badge/github.com/starwander/GoFibonacciHeap)](https://goreportcard.com/report/github.com/starwander/GoFibonacciHeap)
+[![GoDoc](https://godoc.org/github.com/starwander/GoFibonacciHeap?status.svg)](https://godoc.org/github.com/starwander/GoFibonacciHeap)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0)
 
 GoFibonacciHeap is a [Golang](https://golang.org/) implementation of [Fibonacci Heap](https://en.wikipedia.org/wiki/Fibonacci_heap).
@@ -20,7 +20,7 @@ But the union operation of this implementation is O(n) rather than O(1) of the t
 ##Requirements
 #####Download this package
 
-    go get github.com/EthanZhuang/GoFibonacciHeap
+    go get github.com/starwander/GoFibonacciHeap
 
 #####Implements Value interface of this package for all values going to be inserted by value interfaces
 ```go
@@ -66,7 +66,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/EthanZhuang/GoFibonacciHeap"
+	"github.com/starwander/GoFibonacciHeap"
 )
 
 type student struct {
@@ -111,7 +111,7 @@ func main() {
 
 ## Reference
 
-[GoDoc](https://godoc.org/github.com/EthanZhuang/GoFibonacciHeap)
+[GoDoc](https://godoc.org/github.com/starwander/GoFibonacciHeap)
 
 ## LICENSE
 
