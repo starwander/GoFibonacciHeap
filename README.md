@@ -110,7 +110,7 @@ func main() {
 	fmt.Println(heap.ExtractMin()) // &{Amy 16.5}
 
 	fmt.Println(heap.Num()) // 1
-	fmt.Println(heap.ExtractTag("Tom")) // &{Tom 21}
+	fmt.Println(heap.ExtractValue("Tom")) // &{Tom 21}
 	fmt.Println(heap.Num()) // 0
 }
 ```
