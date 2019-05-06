@@ -11,10 +11,10 @@ Thanks to the index map, the internal struct 'node' no longer need to be exposed
 The index map also makes the random access to the values in the heap possible.
 But the union operation of this implementation is O(n) rather than O(1) of the traditional implementation.
 
-| Operations                 | Insert | Minimum | ExtractMin | Union | DecreaseKey | Delete    | Get  |
-| :------------------------: | :----: | :-----: | :--------: | :---: | :---------: | :-------: | :--: |
-| Traditional Implementation | O(1)   | O(1)    | O(log n)¹  | O(1)  | O(1)¹       | O(log n)¹ | N/A  |
-| This Implementation        | O(1)   | O(1)    | O(log n)¹  | O(n)  | O(1)¹       | O(log n)¹ | O(1) |
+| Operations                 | Insert | Minimum | ExtractMin | Union | DecreaseKey | IncreaseKey | Delete    | Get  |
+| :------------------------: | :----: | :-----: | :--------: | :---: | :---------: | :---------: | :-------: | :--: |
+| Traditional Implementation | O(1)   | O(1)    | O(log n)¹  | O(1)  | O(1)¹       | O(1)¹       | O(log n)¹ | N/A  |
+| This Implementation        | O(1)   | O(1)    | O(log n)¹  | O(n)  | O(1)¹       | O(1)¹       | O(log n)¹ | O(1) |
 ¹ Amortized time.
 
 ##Requirements
@@ -41,6 +41,7 @@ type Value interface {
  - Minimum: returns the current minimum tag/key in the heap sorted by key.
  - ExtractMin: returns the current minimum tag/key in the heap and then extracts them from the heap.
  - DecreaseKey: decreases and updates the tag in the heap by the input key.
+ - IncreaseKey: increases and updates the tag in the heap by the input key.
  - Delete: deletes the tag in the heap by the input.
  - GetTag: searches and returns the tag/key in the heap by the input tag.
  - ExtractTag: searches and extracts the tag/key in the heap by the input tag.
@@ -50,6 +51,7 @@ type Value interface {
  - MinimumValue: returns the current minimum value in the heap sorted by key.
  - ExtractMinValue: returns the current minimum value in the heap and then extracts the value from the heap.
  - DecreaseKeyValue: decreases and updates the value in the heap by the input.
+ - IncreaseKeyValue: increases and updates the value in the heap by the input.
  - DeleteValue: deletes the value in the heap by the input.
  - GetValue: searches and returns the value in the heap by the input tag.
  - ExtractValue: searches and extracts the value in the heap by the input tag.
@@ -85,27 +87,31 @@ func (s *student) Key() float64 {
 func main() {
 	heap := fibHeap.NewFibHeap()
 
-	heap.Insert(&student{"John", 18.3})
-	heap.Insert(&student{"Tom", 21.0})
-	heap.Insert(&student{"Jessica", 19.4})
-	heap.Insert(&student{"Amy", 23.1})
+	heap.InsertValue(&student{"John", 18.3})
+	heap.InsertValue(&student{"Tom", 21.0})
+	heap.InsertValue(&student{"Jessica", 19.4})
+	heap.InsertValue(&student{"Amy", 23.1})
 
-	fmt.Println(heap.Num())     //4
-	fmt.Println(heap.Minimum()) //&{John 18.3}
-	fmt.Println(heap.Num())     //4
+	fmt.Println(heap.Num())     // 4
+	fmt.Println(heap.Minimum()) // &{John 18.3}
+	fmt.Println(heap.Num())     // 4
 
-	fmt.Println(heap.ExtractMin()) //&{John 18.3}
-	fmt.Println(heap.ExtractMin()) //&{Jessica 19.4}
-	fmt.Println(heap.Num())        //2
+	john := heap.GetValue("John")
+	john.(*student).age = 20
+	heap.IncreaseKeyValue(john)
+	fmt.Println(heap.ExtractMin()) // &{Jessica 19.4}
 
-	amy := heap.GetTag("Amy")
+	fmt.Println(heap.ExtractMin()) // &{John 20}
+	fmt.Println(heap.Num())        // 2
+
+	amy := heap.GetValue("Amy")
 	amy.(*student).age = 16.5
-	heap.DecreaseKey(amy)
-	fmt.Println(heap.ExtractMin()) //&{Amy 16.5}
+	heap.DecreaseKeyValue(amy)
+	fmt.Println(heap.ExtractMin()) // &{Amy 16.5}
 
-	fmt.Println(heap.Num()) //1
-	fmt.Println(heap.ExtractTag("Tom")) //&{Tom 21}
-	fmt.Println(heap.Num()) //0
+	fmt.Println(heap.Num()) // 1
+	fmt.Println(heap.ExtractTag("Tom")) // &{Tom 21}
+	fmt.Println(heap.Num()) // 0
 }
 ```
 

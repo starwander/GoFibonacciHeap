@@ -36,7 +36,7 @@ var _ = Describe("Tests of fibHeap", func() {
 			Expect(heap.Insert(nil, 0.0)).Should(HaveOccurred())
 		})
 
-		It("Given a empty fibHeap, when call Insert api with a negetive infinity key, it should return error.", func() {
+		It("Given a empty fibHeap, when call Insert api with a negative infinity key, it should return error.", func() {
 			Expect(heap.Insert(1000, math.Inf(-1))).Should(HaveOccurred())
 		})
 
@@ -93,12 +93,12 @@ var _ = Describe("Tests of fibHeap", func() {
 			Expect(heap.Num()).Should(BeEquivalentTo(1000))
 		})
 
-		It("Given a fibHeap with a value, when call DecreaseKey api with a negetive infinity key, it should return error.", func() {
+		It("Given a fibHeap with a value, when call DecreaseKey api with a negative infinity key, it should return error.", func() {
 			heap.Insert(1000, float64(1000))
 			Expect(heap.DecreaseKey(1000, math.Inf(-1))).Should(HaveOccurred())
 		})
 
-		It("Given a fibHeap inserted multiple values, when call DecreaseKey api with a greater key, it should return error.", func() {
+		It("Given a fibHeap inserted multiple values, when call DecreaseKey api with a larger key, it should return error.", func() {
 			for i := 0; i < 1000; i++ {
 				heap.Insert(i, float64(i))
 			}
@@ -121,6 +121,50 @@ var _ = Describe("Tests of fibHeap", func() {
 				tag, key := heap.ExtractMin()
 				Expect(tag).Should(BeEquivalentTo(i))
 				Expect(key).Should(BeEquivalentTo(i))
+			}
+		})
+
+		It("Given a fibHeap, when call IncreaseKey api with a nil value, it should return error.", func() {
+			Expect(heap.IncreaseKey(nil, 0.0)).Should(HaveOccurred())
+		})
+
+		It("Given a fibHeap inserted multiple values, when call IncreaseKey api with a non-exists value, it should return error.", func() {
+			for i := 0; i < 1000; i++ {
+				heap.Insert(i, float64(i))
+			}
+
+			Expect(heap.IncreaseKey(1000, float64(999))).Should(HaveOccurred())
+			Expect(heap.Num()).Should(BeEquivalentTo(1000))
+		})
+
+		It("Given a fibHeap with a value, when call IncreaseKey api with a negative infinity key, it should return error.", func() {
+			heap.Insert(1000, float64(1000))
+			Expect(heap.IncreaseKey(1000, math.Inf(-1))).Should(HaveOccurred())
+		})
+
+		It("Given a fibHeap inserted multiple values, when call IncreaseKey api with a smaller key, it should return error.", func() {
+			for i := 0; i < 1000; i++ {
+				heap.Insert(i, float64(i))
+			}
+
+			Expect(heap.IncreaseKey(999, float64(998))).Should(HaveOccurred())
+			Expect(heap.Num()).Should(BeEquivalentTo(1000))
+		})
+
+		It("Given a fibHeap inserted multiple values, when call IncreaseKey api with a larger key, it should increase the key of the value in the heap.", func() {
+			for i := 0; i < 1000; i++ {
+				heap.Insert(i, float64(i))
+			}
+			heap.ExtractMinValue()
+			for i := 999; i >= 1; i-- {
+				Expect(heap.IncreaseKey(i, float64(i+1000))).ShouldNot(HaveOccurred())
+			}
+			Expect(heap.Num()).Should(BeEquivalentTo(999))
+
+			for i := 1; i < 1000; i++ {
+				tag, key := heap.ExtractMin()
+				Expect(tag).Should(BeEquivalentTo(i))
+				Expect(key).Should(BeEquivalentTo(i + 1000))
 			}
 		})
 
@@ -168,7 +212,7 @@ var _ = Describe("Tests of fibHeap", func() {
 			Expect(heap.InsertValue(nil)).Should(HaveOccurred())
 		})
 
-		It("Given a empty fibHeap, when call Insert api with a negetive infinity key, it should return error.", func() {
+		It("Given a empty fibHeap, when call Insert api with a negative infinity key, it should return error.", func() {
 			demo := new(demoStruct)
 			demo.tag = 1000
 			demo.key = math.Inf(-1)
@@ -244,7 +288,7 @@ var _ = Describe("Tests of fibHeap", func() {
 			Expect(heap.Num()).Should(BeEquivalentTo(1000))
 		})
 
-		It("Given a fibHeap with a value, when call DecreaseKey api with a negetive infinity key, it should return error.", func() {
+		It("Given a fibHeap with a value, when call DecreaseKey api with a negative infinity key, it should return error.", func() {
 			demo := new(demoStruct)
 			demo.tag = 1000
 			demo.key = float64(1000)
@@ -255,7 +299,7 @@ var _ = Describe("Tests of fibHeap", func() {
 			Expect(heap.DecreaseKeyValue(demo)).Should(HaveOccurred())
 		})
 
-		It("Given a fibHeap inserted multiple values, when call DecreaseKey api with a greater key, it should return error.", func() {
+		It("Given a fibHeap inserted multiple values, when call DecreaseKey api with a larger key, it should return error.", func() {
 			for i := 0; i < 1000; i++ {
 				demo := new(demoStruct)
 				demo.tag = i
@@ -295,6 +339,83 @@ var _ = Describe("Tests of fibHeap", func() {
 				value := heap.ExtractMinValue()
 				Expect(value.(*demoStruct).tag).Should(BeEquivalentTo(i))
 				Expect(value.(*demoStruct).key).Should(BeEquivalentTo(i))
+				Expect(value.(*demoStruct).value).Should(BeEquivalentTo(fmt.Sprint(i)))
+			}
+		})
+
+		It("Given a fibHeap, when call IncreaseKey api with a nil value, it should return error.", func() {
+			Expect(heap.IncreaseKeyValue(nil)).Should(HaveOccurred())
+		})
+
+		It("Given a fibHeap inserted multiple values, when call IncreaseKey api with a non-exists value, it should return error.", func() {
+			for i := 0; i < 1000; i++ {
+				demo := new(demoStruct)
+				demo.tag = i
+				demo.key = float64(i)
+				demo.value = fmt.Sprint(demo.key)
+				heap.InsertValue(demo)
+			}
+
+			increaseDemo := new(demoStruct)
+			increaseDemo.tag = 1000
+			increaseDemo.key = float64(1001)
+			increaseDemo.value = fmt.Sprint(increaseDemo.key)
+
+			Expect(heap.IncreaseKeyValue(increaseDemo)).Should(HaveOccurred())
+			Expect(heap.Num()).Should(BeEquivalentTo(1000))
+		})
+
+		It("Given a fibHeap with a value, when call IncreaseKey api with a negative infinity key, it should return error.", func() {
+			demo := new(demoStruct)
+			demo.tag = 1000
+			demo.key = float64(1000)
+			demo.value = fmt.Sprint(1000)
+			heap.InsertValue(demo)
+
+			demo.key = math.Inf(-1)
+			Expect(heap.IncreaseKeyValue(demo)).Should(HaveOccurred())
+		})
+
+		It("Given a fibHeap inserted multiple values, when call IncreaseKey api with a smaller key, it should return error.", func() {
+			for i := 0; i < 1000; i++ {
+				demo := new(demoStruct)
+				demo.tag = i
+				demo.key = float64(i)
+				demo.value = fmt.Sprint(demo.key)
+				heap.InsertValue(demo)
+			}
+
+			increaseDemo := new(demoStruct)
+			increaseDemo.tag = 999
+			increaseDemo.key = float64(998)
+			increaseDemo.value = fmt.Sprint(increaseDemo.key)
+
+			Expect(heap.IncreaseKeyValue(increaseDemo)).Should(HaveOccurred())
+			Expect(heap.Num()).Should(BeEquivalentTo(1000))
+		})
+
+		It("Given a fibHeap inserted multiple values, when call IncreaseKey api with a larger key, it should increase the key of the value in the heap.", func() {
+			for i := 0; i < 1000; i++ {
+				demo := new(demoStruct)
+				demo.tag = i
+				demo.key = float64(i)
+				demo.value = fmt.Sprint(i)
+				heap.InsertValue(demo)
+			}
+			heap.ExtractMinValue()
+			for i := 999; i >= 1; i-- {
+				increaseDemo := new(demoStruct)
+				increaseDemo.tag = i
+				increaseDemo.key = float64(i + 1000)
+				increaseDemo.value = fmt.Sprint(i)
+				Expect(heap.IncreaseKeyValue(increaseDemo)).ShouldNot(HaveOccurred())
+			}
+			Expect(heap.Num()).Should(BeEquivalentTo(999))
+
+			for i := 1; i < 1000; i++ {
+				value := heap.ExtractMinValue()
+				Expect(value.(*demoStruct).tag).Should(BeEquivalentTo(i))
+				Expect(value.(*demoStruct).key).Should(BeEquivalentTo(i + 1000))
 				Expect(value.(*demoStruct).value).Should(BeEquivalentTo(fmt.Sprint(i)))
 			}
 		})
@@ -673,8 +794,8 @@ var _ = Describe("Tests of fibHeap", func() {
 			rand.Seed(time.Now().Unix())
 			b.Time("1000000 radom operations", func() {
 				var (
-					insert, minimun, extract, decrease, get, delete int64
-					min                                             *demoStruct
+					insert, minimun, extract, decrease, get, delete, increase int64
+					min                                                       *demoStruct
 				)
 				for i := 0; i < 1000000; i++ {
 					if i%3 == 0 {
@@ -737,9 +858,21 @@ var _ = Describe("Tests of fibHeap", func() {
 							}
 						}
 					}
+					if i%17 == 0 {
+						if temp := heap.GetValue(int(3 * rand.Int31n(int32(i/3)+1))); temp != nil {
+							get++
+							temp.(*demoStruct).key = temp.(*demoStruct).key * 2
+							heap.IncreaseKeyValue(temp)
+							increase++
+							currentMin := heap.MinimumValue()
+							Expect(currentMin).ShouldNot(BeNil())
+							minimun++
+							min = currentMin.(*demoStruct)
+						}
+					}
 				}
 				fmt.Println("Final heap size:", heap.Num())
-				fmt.Println("Total insert:", insert, "Total minimun:", minimun, "Total extract:", extract, "Total get:", get, "Total decrease:", decrease, "Total delete:", delete)
+				fmt.Println("Total insert:", insert, "Total minimum:", minimun, "Total extract:", extract, "Total get:", get, "Total decrease:", decrease, "Total delete:", delete, "Total increase:", increase)
 				Expect(heap.Num()).Should(BeEquivalentTo(insert - extract - delete))
 			})
 		}, 10)

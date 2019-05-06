@@ -69,7 +69,7 @@ func (heap *FibHeap) Num() uint {
 // Try to input of an interface with nil value will cause invalid address panic.
 func (heap *FibHeap) Insert(tag interface{}, key float64) error {
 	if tag == nil {
-		return errors.New("Input tag is nil.")
+		return errors.New("Input tag is nil ")
 	}
 
 	return heap.insert(tag, key, nil)
@@ -84,7 +84,7 @@ func (heap *FibHeap) Insert(tag interface{}, key float64) error {
 // Try to input of an interface with nil value will cause invalid address panic.
 func (heap *FibHeap) InsertValue(value Value) error {
 	if value == nil {
-		return errors.New("Input value is nil.")
+		return errors.New("Input value is nil ")
 	}
 
 	return heap.insert(value.Tag(), value.Key(), value)
@@ -141,7 +141,7 @@ func (heap *FibHeap) ExtractMinValue() Value {
 func (heap *FibHeap) Union(anotherHeap *FibHeap) error {
 	for tag := range anotherHeap.index {
 		if _, exists := heap.index[tag]; exists {
-			return errors.New("Duplicate tag is found in the target heap")
+			return errors.New("Duplicate tag is found in the target heap ")
 		}
 	}
 
@@ -159,18 +159,18 @@ func (heap *FibHeap) Union(anotherHeap *FibHeap) error {
 // Try to input of an interface with nil value will cause invalid address panic.
 func (heap *FibHeap) DecreaseKey(tag interface{}, key float64) error {
 	if tag == nil {
-		return errors.New("Input tag is nil.")
+		return errors.New("Input tag is nil ")
 	}
 
 	if math.IsInf(key, -1) {
-		return errors.New("Negative infinity key is reserved for internal usage.")
+		return errors.New("Negative infinity key is reserved for internal usage ")
 	}
 
 	if node, exists := heap.index[tag]; exists {
 		return heap.decreaseKey(node, nil, key)
 	}
 
-	return errors.New("Value is not found")
+	return errors.New("Value is not found ")
 }
 
 // DecreaseKeyValue updates the value in the heap by the input value.
@@ -180,18 +180,60 @@ func (heap *FibHeap) DecreaseKey(tag interface{}, key float64) error {
 // Try to input of an interface with nil value will cause invalid address panic.
 func (heap *FibHeap) DecreaseKeyValue(value Value) error {
 	if value == nil {
-		return errors.New("Input value is nil.")
+		return errors.New("Input value is nil ")
 	}
 
 	if math.IsInf(value.Key(), -1) {
-		return errors.New("Negative infinity key is reserved for internal usage.")
+		return errors.New("Negative infinity key is reserved for internal usage ")
 	}
 
 	if node, exists := heap.index[value.Tag()]; exists {
 		return heap.decreaseKey(node, value, value.Key())
 	}
 
-	return errors.New("Value is not found")
+	return errors.New("Value is not found ")
+}
+
+// IncreaseKey updates the tag in the heap by the input key.
+// If the input key has a smaller key or -inf key, an error will be returned.
+// If the input tag is not existed in the heap, an error will be returned.
+// IncreaseKey will check the nil interface but not the interface with nil value.
+// Try to input of an interface with nil value will cause invalid address panic.
+func (heap *FibHeap) IncreaseKey(tag interface{}, key float64) error {
+	if tag == nil {
+		return errors.New("Input tag is nil ")
+	}
+
+	if math.IsInf(key, -1) {
+		return errors.New("Negative infinity key is reserved for internal usage ")
+	}
+
+	if node, exists := heap.index[tag]; exists {
+		return heap.increaseKey(node, nil, key)
+	}
+
+	return errors.New("Value is not found ")
+}
+
+// IncreaseKeyValue updates the value in the heap by the input value.
+// If the input value has a smaller key or -inf key, an error will be returned.
+// If the tag of the input value is not existed in the heap, an error will be returned.
+// IncreaseKeyValue will check the nil interface but not the interface with nil value.
+// Try to input of an interface with nil value will cause invalid address panic.
+func (heap *FibHeap) IncreaseKeyValue(value Value) error {
+	if value == nil {
+		return errors.New("Input value is nil ")
+	}
+
+	if math.IsInf(value.Key(), -1) {
+		return errors.New("Negative infinity key is reserved for internal usage ")
+	}
+
+	if node, exists := heap.index[value.Tag()]; exists {
+		return heap.increaseKey(node, value, value.Key())
+	}
+
+	return errors.New("Value is not found ")
 }
 
 // Delete deletes the input tag in the heap.
@@ -200,11 +242,11 @@ func (heap *FibHeap) DecreaseKeyValue(value Value) error {
 // Try to input of an interface with nil value will cause invalid address panic.
 func (heap *FibHeap) Delete(tag interface{}) error {
 	if tag == nil {
-		return errors.New("Input tag is nil.")
+		return errors.New("Input tag is nil ")
 	}
 
 	if _, exists := heap.index[tag]; !exists {
-		return errors.New("Tag is not found")
+		return errors.New("Tag is not found ")
 	}
 
 	heap.ExtractValue(tag)
@@ -218,11 +260,11 @@ func (heap *FibHeap) Delete(tag interface{}) error {
 // Try to input of an interface with nil value will cause invalid address panic.
 func (heap *FibHeap) DeleteValue(value Value) error {
 	if value == nil {
-		return errors.New("Input value is nil.")
+		return errors.New("Input value is nil ")
 	}
 
 	if _, exists := heap.index[value.Tag()]; !exists {
-		return errors.New("Value is not found")
+		return errors.New("Value is not found ")
 	}
 
 	heap.ExtractValue(value.Tag())
@@ -347,11 +389,11 @@ func (heap *FibHeap) consolidate() {
 
 func (heap *FibHeap) insert(tag interface{}, key float64, value Value) error {
 	if math.IsInf(key, -1) {
-		return errors.New("Negative infinity key is reserved for internal usage.")
+		return errors.New("Negative infinity key is reserved for internal usage ")
 	}
 
 	if _, exists := heap.index[tag]; exists {
-		return errors.New("Duplicate tag is not allowed")
+		return errors.New("Duplicate tag is not allowed ")
 	}
 
 	node := new(node)
@@ -396,8 +438,8 @@ func (heap *FibHeap) extractMin() *node {
 	return min
 }
 
-func (heap *FibHeap) deleteNode(node *node) {
-	heap.decreaseKey(node, node.value, math.Inf(-1))
+func (heap *FibHeap) deleteNode(n *node) {
+	heap.decreaseKey(n, n.value, math.Inf(-1))
 	heap.ExtractMinValue()
 }
 
@@ -417,43 +459,68 @@ func (heap *FibHeap) resetMin() {
 	}
 }
 
-func (heap *FibHeap) decreaseKey(node *node, value Value, key float64) error {
-	if key > node.key {
-		return errors.New("New key is greater than current key")
+func (heap *FibHeap) decreaseKey(n *node, value Value, key float64) error {
+	if key >= n.key {
+		return errors.New("New key is not smaller than current key ")
 	}
 
-	node.key = key
-	node.value = value
-	if node.parent != nil {
-		parent := node.parent
-		if node.key < node.parent.key {
-			heap.cut(node)
+	n.key = key
+	n.value = value
+	if n.parent != nil {
+		parent := n.parent
+		if n.key < n.parent.key {
+			heap.cut(n)
 			heap.cascadingCut(parent)
 		}
 	}
 
-	if node.parent == nil && node.key < heap.min.key {
-		heap.min = node
+	if n.parent == nil && n.key < heap.min.key {
+		heap.min = n
 	}
 
 	return nil
 }
 
-func (heap *FibHeap) cut(node *node) {
-	node.parent.children.Remove(node.self)
-	node.parent.degree--
-	node.parent = nil
-	node.marked = false
-	node.self = heap.roots.PushBack(node)
+func (heap *FibHeap) increaseKey(n *node, value Value, key float64) error {
+	if key <= n.key {
+		return errors.New("New key is not larger than current key ")
+	}
+
+	n.key = key
+	n.value = value
+
+	child := n.children.Front()
+	for child != nil {
+		childNode := child.Value.(*node)
+		child = child.Next()
+		if childNode.key < n.key {
+			heap.cut(childNode)
+			heap.cascadingCut(n)
+		}
+	}
+
+	if heap.min == n {
+		heap.resetMin()
+	}
+
+	return nil
 }
 
-func (heap *FibHeap) cascadingCut(node *node) {
-	if node.parent != nil {
-		if !node.marked {
-			node.marked = true
+func (heap *FibHeap) cut(n *node) {
+	n.parent.children.Remove(n.self)
+	n.parent.degree--
+	n.parent = nil
+	n.marked = false
+	n.self = heap.roots.PushBack(n)
+}
+
+func (heap *FibHeap) cascadingCut(n *node) {
+	if n.parent != nil {
+		if !n.marked {
+			n.marked = true
 		} else {
-			parent := node.parent
-			heap.cut(node)
+			parent := n.parent
+			heap.cut(n)
 			heap.cascadingCut(parent)
 		}
 	}
